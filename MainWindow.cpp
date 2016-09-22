@@ -8,7 +8,7 @@ const QString MainWindow::ms_avatarEntry = QStringLiteral("avatar");
 MainWindow::MainWindow(QWidget *parent):
   QMainWindow(parent),
   m_ui(new Ui::MainWindow),
-  m_settings(QStringLiteral("dotborg"), QStringLiteral("Companion of the Avatar"))
+  m_settings(QStringLiteral("Esperantisto"), QStringLiteral("Companion of the Avatar"))
 {
   m_ui->setupUi(this);
 
