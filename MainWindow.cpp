@@ -4,11 +4,14 @@
 
 const QString MainWindow::ms_dirEntry = QStringLiteral("logDir");
 const QString MainWindow::ms_avatarEntry = QStringLiteral("avatar");
+const QString MainWindow::ms_enableSortEntry = QStringLiteral("enableSort");
+const QString MainWindow::ms_sortColumnEntry = QStringLiteral("sortColumn");
+const QString MainWindow::ms_sortOrderEntry = QStringLiteral("sortOrder");
 
 MainWindow::MainWindow(QWidget *parent):
   QMainWindow(parent),
   m_ui(new Ui::MainWindow),
-  m_settings(QStringLiteral("Esperantisto"), QStringLiteral("Companion of the Avatar"))
+  m_settings(QStringLiteral("Barugon"), QStringLiteral("Companion of the Avatar"))
 {
   m_ui->setupUi(this);
 
@@ -25,20 +28,31 @@ MainWindow::MainWindow(QWidget *parent):
     m_ui->statusBar->showMessage(QStringLiteral("Chat log directory not set."));
   else
   {
+    m_logDir.setPath(directory);
     this->_refreshAvatars(directory);
 
     QString avatarName = m_settings.value(ms_avatarEntry).toString();
     if (!avatarName.isEmpty())
     {
+      m_avatar = avatarName;
       m_ui->comboBox->setCurrentText(avatarName);
       this->_refreshStats(m_ui->comboBox->currentText());
     }
   }
 
-  // Connect the changed signal of the avatar name combo-box.
-  connect(m_ui->comboBox, &QComboBox::currentTextChanged, [this](const QString &avatarName)
+  m_sortColumn = m_settings.value(ms_sortColumnEntry).toInt();
+  m_sortOrder = m_settings.value(ms_sortOrderEntry).toInt();
+  if (m_settings.value(ms_enableSortEntry).toBool())
   {
-    this->_refreshStats(avatarName);
+    m_ui->actionEnableSort->setChecked(true);
+    m_ui->treeWidget->setSortingEnabled(true);
+    m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
+  }
+
+  // Connect the changed signal of the avatar name combo-box.
+  connect(m_ui->comboBox, &QComboBox::currentTextChanged, [this](const QString &text)
+  {
+    this->_refreshStats(text);
   });
 
   // Connect the select folder action.
@@ -62,6 +76,33 @@ MainWindow::MainWindow(QWidget *parent):
   {
     this->_refreshStats(m_ui->comboBox->currentText());
   });
+
+  // Connect the enable sort action.
+  connect(m_ui->actionEnableSort, &QAction::triggered, [this](bool checked)
+  {
+    m_settings.setValue(ms_enableSortEntry, checked);
+    m_ui->treeWidget->setSortingEnabled(checked);
+    if (checked)
+      m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
+    else
+      this->_refreshStats(m_ui->comboBox->currentText());
+  });
+
+  // Connect the sort indicator changed signal.
+  connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, [this](int column, Qt::SortOrder order)
+  {
+    if (m_sortColumn != column)
+    {
+      m_sortColumn = column;
+      m_settings.setValue(ms_sortColumnEntry, m_sortColumn);
+    }
+
+    if (m_sortOrder != int(order))
+    {
+      m_sortOrder = int(order);
+      m_settings.setValue(ms_sortOrderEntry, m_sortOrder);
+    }
+  });
 }
 
 MainWindow::~MainWindow()
@@ -71,13 +112,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::_refreshAvatars(const QString &directory)
 {
-  m_settings.setValue(ms_dirEntry, directory);
+  if (m_logDir.path() != directory)
+  {
+    m_settings.setValue(ms_dirEntry, directory);
+    m_logDir.setPath(directory);
+  }
 
   // Clear out the avatar names.
   m_ui->comboBox->clear();
 
   // Get a list of the log files.
-  m_logDir.setPath(directory);
   auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("*.txt")});
   if (fileInfoList.isEmpty())
   {
@@ -126,7 +170,11 @@ void MainWindow::_refreshAvatars(const QString &directory)
 
 void MainWindow::_refreshStats(const QString &avatarName)
 {
-  m_settings.setValue(ms_avatarEntry, avatarName);
+  if (m_avatar != avatarName)
+  {
+    m_settings.setValue(ms_avatarEntry, avatarName);
+    m_avatar = avatarName;
+  }
 
   // Clear out the stats.
   m_ui->treeWidget->clear();
@@ -156,10 +204,10 @@ void MainWindow::_refreshStats(const QString &avatarName)
     {
       QByteArray line = file.readLine();
       int pos = line.indexOf("AdventurerLevel:");
-      if (pos == 24)
+      if (pos > 0)
       {
-        dateTime = line.mid(1, 21);
         stats = line.mid(pos);
+        dateTime = line.mid(1, pos - 3);
       }
     }
 
