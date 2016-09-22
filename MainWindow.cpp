@@ -213,6 +213,11 @@ void MainWindow::_refreshStats(const QString &avatarName)
 
     if (!stats.isEmpty())
     {
+      const static QSet<QString> highlighted = {
+        QStringLiteral("AdventurerLevel:"),
+        QStringLiteral("ProducerLevel:")
+      };
+
       // Split the text at spaces.
       auto fields = stats.split(' ');
 
@@ -222,7 +227,16 @@ void MainWindow::_refreshStats(const QString &avatarName)
       {
         QString text = fields.takeFirst();
         QString value = fields.takeFirst();
-        items.append(new QTreeWidgetItem({text, value}));
+
+        auto item = new QTreeWidgetItem({text, value});
+        if (highlighted.find(text) == highlighted.end())
+        {
+          QBrush brush(QColor(96, 96, 96, 255));
+          item->setForeground(0, brush);
+          item->setForeground(1, brush);
+        }
+
+        items.append(item);
       }
 
       // Insert the items into the tree.
