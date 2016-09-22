@@ -3,5 +3,5 @@ CotA is a small application to display the stats ("/stats") recorded to a chat l
 
 To build CotA, you will need to install Qt5. Simply open CotA.pro in Qt Creator, select the project configuration (if it's the first time opening the project) and click build (or run).
 
-The first time you run CotA, you will need to select the SotA chat log folder from the file menu.
+The first time you run CotA, you will need to select the SotA chat log folder from the file menu. On Linux, this is located in "~/.config/Portalarium/Shroud of the Avatar/ChatLogs".
 
