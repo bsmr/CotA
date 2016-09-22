@@ -5,3 +5,5 @@ You will need to install Qt5, which is totally free. Download it from https://ww
 
 The first time you run CotA, you will need to select the SotA chat log folder from the file menu. On Linux, this is located under your home folder at ".config/Portalarium/Shroud of the Avatar/ChatLogs".
 
+![screenshot](http://m8.i.pbase.com/o9/09/605909/1/164136608.dyCHu4ml.Screenshotfrom20160922022412.png)
+
