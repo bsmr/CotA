@@ -282,7 +282,6 @@ void MainWindow::_refreshStats(const QString &avatarName)
 
             case 1:
             {
-              // Use a gray brush for the text.
               item->setForeground(0, grayBrush);
               item->setForeground(1, grayBrush);
 
