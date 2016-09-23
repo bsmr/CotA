@@ -3,5 +3,9 @@ CotA is a small application to display the stats ("/stats") recorded to a chat l
 
 ![screenshot](http://m8.i.pbase.com/o9/09/605909/1/164136608.lifTb439.Screenshotfrom20160922190521.png)
 
-You will need to install Qt5, which is totally free. Download it from https://www.qt.io/. To build CotA, Simply open the project file (CotA.pro) in Qt Creator, select the project configuration if it's the first time opening the project and then click the build button (or run button :).
+To build CotA, you will need to install Qt5, which is totally free (https://www.qt.io). Once Qt is installed, start Qt Creator and open the project file CotA.pro. The first time the project is opened, Qt Creator will prompt for the project configuration you desire. Select only a desktop configuration (others may be present, like iOS or Android, depending on what you installed) and click the "Configure Project" button.
+
+Next, click the computer icon in the lower left with the word "Debug" below it and select "Release". Finally, click the green run button below that. This will build and run the executable. After that, you won't need to run Qt Creator again unless you want to rebuild the CotA.
+
+The CotA executable can be found in a folder next to the project folder with a name something like "build-CotA-Desktop_Qt_5_7_0_GCC_64bit-Release". You can move this executable wherever you like and double click to run it.
 
