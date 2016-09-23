@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QDir>
+#include <QLabel>
 #include <QMainWindow>
 #include <QSettings>
 
@@ -19,19 +20,22 @@ public:
   ~MainWindow();
 
 private:
-  const static QString ms_dirEntry;
-  const static QString ms_avatarEntry;
-  const static QString ms_enableSortEntry;
-  const static QString ms_sortColumnEntry;
-  const static QString ms_sortOrderEntry;
+  static const QString ms_dirEntry;
+  static const QString ms_avatarEntry;
+  static const QString ms_enableSortEntry;
+  static const QString ms_sortColumnEntry;
+  static const QString ms_sortOrderEntry;
 
   Ui::MainWindow *m_ui;
+  QLabel *m_statusLabel;
   QSettings m_settings;
   QString m_avatar;
   QDir m_logDir;
+  QMetaObject::Connection m_sortIndicatorConnetion;
   int m_sortColumn{0};
   int m_sortOrder{0};
 
+  void _updateSortSettings(int column, int order);
   void _refreshAvatars(const QString &directory);
   void _refreshStats(const QString &avatarName);
 };
