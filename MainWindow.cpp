@@ -28,13 +28,12 @@ MainWindow::MainWindow(QWidget *parent):
 #if defined(Q_OS_LINUX)
   const QString defaultDirectory = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
 #elif defined(Q_OS_OSX)
-  // I'm guessing that OS X is the same as Linux, which is probably wrong.
+  // This path is probably wrong.
   const QString defaultDirectory = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
 #elif defined(Q_OS_WIN32)
-  // Here's a guess at Windows.
   const QString defaultDirectory = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
 #else
-# error "You are attempting to compile CotA for a platform that SotA does not run on."
+# error "You are attempting to compile CotA for a platform that SotA does not support."
 #endif
 
   // Get the settings before connecting to any signals.
@@ -49,9 +48,12 @@ MainWindow::MainWindow(QWidget *parent):
     const QString avatarName = m_settings.value(ms_avatarEntry).toString();
     if (!avatarName.isEmpty())
     {
-      m_avatar = avatarName;
       m_ui->comboBox->setCurrentText(avatarName);
-      this->_refreshStats(m_ui->comboBox->currentText());
+      if (m_ui->comboBox->currentText() == avatarName)
+      {
+        m_avatar = avatarName;
+        this->_refreshStats(m_ui->comboBox->currentText());
+      }
     }
   }
 
@@ -88,6 +90,12 @@ MainWindow::MainWindow(QWidget *parent):
       if (!directories.isEmpty())
         this->_refreshAvatars(directories.takeFirst());
     }
+  });
+
+  // Connect the reset action.
+  QObject::connect(m_ui->actionReset, &QAction::triggered, [this](bool)
+  {
+    this->_refreshAvatars(m_logDir.path());
   });
 
   // Connect the refresh action.
@@ -166,13 +174,10 @@ void MainWindow::_refreshAvatars(const QString &directory)
   static const QString startText = QStringLiteral("SotAChatLog_");
   QSet<QString> nameSet;
 
-  // Get the avatar names.
+  // Extract the avatar names.
   for (auto& fileInfo: fileInfoList)
   {
     QString name = fileInfo.baseName();
-    if (!name.startsWith(startText))
-      continue;
-
     int pos = name.lastIndexOf(QChar('_'));
     if (pos <= startText.length())
       continue;
@@ -213,7 +218,10 @@ void MainWindow::_refreshStats(const QString &avatarName)
   // Clear out the stats.
   m_ui->treeWidget->clear();
   if (avatarName.isEmpty())
+  {
+    m_statusLabel->clear();
     return;
+  }
 
   // Get a list of log files that match the avatar's name ("\?" is used here to avoid warnings about trigraphs).
   auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_%1_???\?-?\?-??.txt").arg(QString(avatarName).replace(QChar(' '), QChar('_')))});
@@ -256,6 +264,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
       {
         static const QBrush blackBrush(QColor(0, 0, 0, 255));
         static const QBrush grayBrush(QColor(96, 96, 96, 255));
+        static const QBrush darkerGrayBrush(QColor(48, 48, 48, 255));
         static const QBrush blueBrush(QColor(0, 0, 128, 255));
         static const QBrush redBrush(QColor(128, 0, 0, 255));
 
@@ -278,7 +287,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
           switch (iter.value())
           {
             case 0:
-              // Use a black brush for AdventurerLevel and ProducerLevel.
+              // Use black text for AdventurerLevel and ProducerLevel.
               item->setForeground(0, blackBrush);
               item->setForeground(1, blackBrush);
               break;
@@ -287,7 +296,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
             {
               const int virtueValue = value.toInt();
 
-              item->setForeground(0, grayBrush);
+              item->setForeground(0, darkerGrayBrush);
               if (virtueValue > 0)
               {
                 // The virtue value is greater than 0, so color it blue.
@@ -299,7 +308,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
                 item->setForeground(1, redBrush);
               }
               else
-                item->setForeground(1, grayBrush);
+                item->setForeground(1, darkerGrayBrush);
 
               break;
             }
