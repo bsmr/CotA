@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent):
   m_ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
   m_ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
+  // Set the directory search parameters so that the most recent log files are found first.
   m_logDir.setFilter(QDir::Files);
   m_logDir.setSorting(QDir::Name | QDir::Reversed);
 
@@ -152,8 +153,8 @@ void MainWindow::_refreshAvatars(const QString &directory)
   // Clear out the avatar names.
   m_ui->comboBox->clear();
 
-  // Get a list of the log files.
-  auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("*.txt")});
+  // Get a list of the log files ("\?" is used here to avoid warnings about trigraphs).
+  auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_*_???\?-?\?-??.txt")});
   if (fileInfoList.isEmpty())
   {
     m_statusLabel->setText(QStringLiteral("No log files found."));
@@ -179,7 +180,7 @@ void MainWindow::_refreshAvatars(const QString &directory)
       continue;
 
     // Replace underscores with spaces and add the name to the set.
-    nameSet.insert(name.replace('_', ' '));
+    nameSet.insert(name.replace(QChar('_'), QChar(' ')));
   }
 
   if (nameSet.empty())
@@ -212,8 +213,8 @@ void MainWindow::_refreshStats(const QString &avatarName)
   if (avatarName.isEmpty())
     return;
 
-  // Get a list of log files that match the avatar's name.
-  auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("*%1*.txt").arg(avatarName)});
+  // Get a list of log files that match the avatar's name ("\?" is used here to avoid warnings about trigraphs).
+  auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_%1_???\?-?\?-??.txt").arg(QString(avatarName).replace(QChar(' '), QChar('_')))});
   if (fileInfoList.isEmpty())
   {
     m_statusLabel->setText(QStringLiteral("No log files found for %1.").arg(avatarName));
@@ -312,7 +313,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
         {
           item->setForeground(0, grayBrush);
           item->setForeground(1, grayBrush);
-          items[INT_MAX].append(item);
+          items[std::numeric_limits<int>::max()].append(item);
         }
       }
 
@@ -320,7 +321,6 @@ void MainWindow::_refreshStats(const QString &avatarName)
       for (auto iter = items.begin(); iter != items.end(); ++iter)
         m_ui->treeWidget->addTopLevelItems(iter.value());
 
-      // The log files are searched in reverse order (newest first), so we're done.
       m_statusLabel->setText(QStringLiteral("Showing stats for %1 from %2.").arg(avatarName).arg(dateTime));
       return;
     }
