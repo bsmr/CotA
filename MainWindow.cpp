@@ -261,21 +261,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
           {QStringLiteral("ProducerLevel:"), 0},
           {QStringLiteral("VirtueCourage:"), 1},
           {QStringLiteral("VirtueLove:"), 1},
-          {QStringLiteral("VirtueTruth:"), 1},
-          {QStringLiteral("Focus:"), 2},
-          {QStringLiteral("Health:"), 2},
-          {QStringLiteral("Dexterity:"), 3},
-          {QStringLiteral("Intelligence:"), 3},
-          {QStringLiteral("Strength:"), 3},
-          {QStringLiteral("FizzleChance:"), 4},
-          {QStringLiteral("AttackSkill:"), 4},
-          {QStringLiteral("CarryCapacity:"), 4},
-          {QStringLiteral("DamageAvoidance:"), 4},
-          {QStringLiteral("DamageResistance:"), 4},
-          {QStringLiteral("TamedCreatureMaxLevel:"), 4},
-          {QStringLiteral("IntoxicationLevel:"), 6},
-          {QStringLiteral("AgricultureLevel:"), 6},
-          {QStringLiteral("PlagueLevel:"), 6}
+          {QStringLiteral("VirtueTruth:"), 1}
         };
 
         QString text = fields.takeFirst();
@@ -322,17 +308,11 @@ void MainWindow::_refreshStats(const QString &avatarName)
 
           items[iter.value()].append(item);
         }
-        else if (text.endsWith(QStringLiteral("Level:")))
-        {
-          item->setForeground(0, grayBrush);
-          item->setForeground(1, grayBrush);
-          items[5].append(item);
-        }
         else
         {
           item->setForeground(0, grayBrush);
           item->setForeground(1, grayBrush);
-          items[6].append(item);
+          items[INT_MAX].append(item);
         }
       }
 
