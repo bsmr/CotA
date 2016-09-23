@@ -284,6 +284,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
             {
               // Use a gray brush for the text.
               item->setForeground(0, grayBrush);
+              item->setForeground(1, grayBrush);
 
               int virtueValue = value.toInt();
               if (virtueValue > 0)
