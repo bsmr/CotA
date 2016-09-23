@@ -25,14 +25,16 @@ MainWindow::MainWindow(QWidget *parent):
   m_logDir.setFilter(QDir::Files);
   m_logDir.setSorting(QDir::Name | QDir::Reversed);
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
-  // Since I know where the default chat-log folder is on Linux, I'll just use it here. I'm guessing that OS X is the same.
+#if defined(Q_OS_LINUX)
+  const QString defaultDirectory = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
+#elif defined(Q_OS_OSX)
+  // I'm guessing that OS X is the same as Linux, which is probably wrong.
   const QString defaultDirectory = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
 #elif defined(Q_OS_WIN32)
   // Here's a guess at Windows.
   const QString defaultDirectory = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
 #else
-  const QString defaultDirectory;
+# error "You are attempting to compile CotA for a platform that SotA does not run on."
 #endif
 
   // Get the settings before connecting to any signals.
@@ -248,7 +250,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
       // Split the text at spaces.
       auto fields = stats.split(' ');
 
-      // Create a list of text/value pair items.
+      // Create a collection of text/value pair items.
       QMap<int, QList<QTreeWidgetItem*>> items;
       while (fields.size() >= 2)
       {
@@ -276,17 +278,16 @@ void MainWindow::_refreshStats(const QString &avatarName)
           switch (iter.value())
           {
             case 0:
-              // Use a black brush for highlighted items.
+              // Use a black brush for AdventurerLevel and ProducerLevel.
               item->setForeground(0, blackBrush);
               item->setForeground(1, blackBrush);
               break;
 
             case 1:
             {
-              item->setForeground(0, grayBrush);
-              item->setForeground(1, grayBrush);
+              const int virtueValue = value.toInt();
 
-              int virtueValue = value.toInt();
+              item->setForeground(0, grayBrush);
               if (virtueValue > 0)
               {
                 // The virtue value is greater than 0, so color it blue.
@@ -297,6 +298,8 @@ void MainWindow::_refreshStats(const QString &avatarName)
                 // The virtue value is less than 0, so color it red.
                 item->setForeground(1, redBrush);
               }
+              else
+                item->setForeground(1, grayBrush);
 
               break;
             }
@@ -311,6 +314,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
         }
         else
         {
+          // Fields not specifically in the ordering collection are put at the end.
           item->setForeground(0, grayBrush);
           item->setForeground(1, grayBrush);
           items[std::numeric_limits<int>::max()].append(item);
