@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT  += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,12 +12,14 @@ TARGET = CotA
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        MainWindow.cpp
+SOURCES += main.cpp \
+    MainWindow.cpp
 
-HEADERS  += MainWindow.h
+HEADERS += \
+    MainWindow.h
 
-FORMS    += MainWindow.ui
+FORMS += \
+    MainWindow.ui
 
 RESOURCES += \
     resource.qrc
