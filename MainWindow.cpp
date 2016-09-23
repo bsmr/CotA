@@ -24,9 +24,12 @@ MainWindow::MainWindow(QWidget *parent):
   m_logDir.setFilter(QDir::Files);
   m_logDir.setSorting(QDir::Name | QDir::Reversed);
 
-#if defined(Q_OS_LINUX)
-  // Since I know where the default chat-log folder is on Linux, I'll just use it here.
+#if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
+  // Since I know where the default chat-log folder is on Linux, I'll just use it here. I'm guessing that OS X is the same.
   const QString defaultDirectory = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
+#elif defined(Q_OS_WIN32)
+  // Here's a guess at Windows.
+  const QString defaultDirectory = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
 #else
   const QString defaultDirectory;
 #endif
@@ -289,7 +292,6 @@ void MainWindow::_refreshStats(const QString &avatarName)
               // Use a black brush for highlighted items.
               item->setForeground(0, blackBrush);
               item->setForeground(1, blackBrush);
-              items[iter.value()].append(item);
               break;
 
             case 1:
@@ -309,16 +311,16 @@ void MainWindow::_refreshStats(const QString &avatarName)
                 item->setForeground(1, redBrush);
               }
 
-              items[iter.value()].append(item);
               break;
             }
 
             default:
               item->setForeground(0, grayBrush);
               item->setForeground(1, grayBrush);
-              items[iter.value()].append(item);
               break;
           }
+
+          items[iter.value()].append(item);
         }
         else if (text.endsWith(QStringLiteral("Level:")))
         {
