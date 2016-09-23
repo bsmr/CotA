@@ -32,7 +32,7 @@
      <number>4</number>
     </property>
     <property name="bottomMargin">
-     <number>4</number>
+     <number>0</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -108,12 +108,19 @@
     <property name="title">
      <string>File</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
     <addaction name="actionSelectDirectory"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionReset"/>
     <addaction name="actionRefresh"/>
     <addaction name="actionEnableSort"/>
    </widget>
@@ -121,17 +128,20 @@
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionRefresh">
+  <action name="actionReset">
    <property name="text">
-    <string>Refresh</string>
+    <string>Reset</string>
    </property>
-   <property name="shortcut">
-    <string>F5</string>
+   <property name="toolTip">
+    <string>Reset the view and reload the list of avatars</string>
    </property>
   </action>
   <action name="actionSelectDirectory">
    <property name="text">
     <string>Select log directory...</string>
+   </property>
+   <property name="toolTip">
+    <string>Select where the the chat-log files are located</string>
    </property>
   </action>
   <action name="actionEnableSort">
@@ -140,6 +150,20 @@
    </property>
    <property name="text">
     <string>Enable sort</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable/disable sorting the stats</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh the stats for the curently selected avatar</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
  </widget>
