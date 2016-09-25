@@ -1,7 +1,7 @@
 # Companion of the Avatar
 CotA is a small application to display the stats ("/stats") recorded to a chat log file from Shroud of the Avatar. 
 
-![screenshot](http://m8.i.pbase.com/o9/09/605909/1/164136608.lifTb439.Screenshotfrom20160922190521.png)
+![screenshot](http://m8.i.pbase.com/o9/09/605909/1/164136608.M9LlECsm.Screenshotfrom20160924210348.png)
 
 To build CotA, you will need to install Qt5, which is totally free (https://www.qt.io). Once Qt is installed, start Qt Creator and open the project file CotA.pro. The first time the project is opened, Qt Creator will prompt for the project configuration you desire. Select only a desktop configuration (others may be present, like iOS or Android, depending on what you installed) and click the "Configure Project" button.
 
