@@ -20,7 +20,7 @@ public:
   ~MainWindow();
 
 private:
-  static const QString ms_dirEntry;
+  static const QString ms_folderEntry;
   static const QString ms_avatarEntry;
   static const QString ms_enableSortEntry;
   static const QString ms_sortColumnEntry;
@@ -36,7 +36,7 @@ private:
   int m_sortOrder{0};
 
   void _updateSortSettings(int column, int order);
-  void _refreshAvatars(const QString &directory);
+  void _refreshAvatars(const QString &folder);
   void _refreshStats(const QString &avatarName);
 };
 

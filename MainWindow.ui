@@ -111,7 +111,7 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <addaction name="actionSelectDirectory"/>
+    <addaction name="actionSelectFolder"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -120,15 +120,15 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <addaction name="actionReset"/>
-    <addaction name="actionRefresh"/>
+    <addaction name="actionResetView"/>
+    <addaction name="actionRefreshStats"/>
     <addaction name="actionEnableSort"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionReset">
+  <action name="actionResetView">
    <property name="text">
     <string>Reset</string>
    </property>
@@ -136,12 +136,12 @@
     <string>Reset the view and reload the list of avatars</string>
    </property>
   </action>
-  <action name="actionSelectDirectory">
+  <action name="actionSelectFolder">
    <property name="text">
-    <string>Select log directory...</string>
+    <string>Select log folder...</string>
    </property>
    <property name="toolTip">
-    <string>Select where the the chat-log files are located</string>
+    <string>Select the folder where the the chat-log files are located</string>
    </property>
   </action>
   <action name="actionEnableSort">
@@ -155,9 +155,9 @@
     <string>Enable/disable sorting the stats</string>
    </property>
   </action>
-  <action name="actionRefresh">
+  <action name="actionRefreshStats">
    <property name="text">
-    <string>Refresh</string>
+    <string>Refresh stats</string>
    </property>
    <property name="toolTip">
     <string>Refresh the stats for the curently selected avatar</string>

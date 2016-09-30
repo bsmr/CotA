@@ -2,7 +2,7 @@
 #include "ui_MainWindow.h"
 #include <QFileDialog>
 
-const QString MainWindow::ms_dirEntry = QStringLiteral("logDir");
+const QString MainWindow::ms_folderEntry = QStringLiteral("logFolder");
 const QString MainWindow::ms_avatarEntry = QStringLiteral("avatar");
 const QString MainWindow::ms_enableSortEntry = QStringLiteral("enableSort");
 const QString MainWindow::ms_sortColumnEntry = QStringLiteral("sortColumn");
@@ -26,24 +26,24 @@ MainWindow::MainWindow(QWidget *parent):
   m_logDir.setSorting(QDir::Name | QDir::Reversed);
 
 #if defined(Q_OS_LINUX)
-  const QString defaultDirectory = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
+  const QString defaultFolder = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
 #elif defined(Q_OS_OSX)
   // This path is probably wrong.
-  const QString defaultDirectory = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
+  const QString defaultFolder = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
 #elif defined(Q_OS_WIN32)
-  const QString defaultDirectory = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
+  const QString defaultFolder = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
 #else
-# error "You are attempting to compile CotA for a platform that SotA does not support."
+  const QString defaultFolder;
 #endif
 
   // Get the settings before connecting to any signals.
-  const QString directory = m_settings.value(ms_dirEntry, defaultDirectory).toString();
-  if (directory.isEmpty())
-    m_statusLabel->setText(QStringLiteral("Chat log directory not set."));
+  const QString folder = m_settings.value(ms_folderEntry, defaultFolder).toString();
+  if (folder.isEmpty())
+    m_statusLabel->setText(QStringLiteral("Chat log folder not set."));
   else
   {
-    m_logDir.setPath(directory);
-    this->_refreshAvatars(directory);
+    m_logDir.setPath(folder);
+    this->_refreshAvatars(folder);
 
     const QString avatarName = m_settings.value(ms_avatarEntry).toString();
     if (!avatarName.isEmpty())
@@ -77,29 +77,29 @@ MainWindow::MainWindow(QWidget *parent):
   });
 
   // Connect the select folder action.
-  QObject::connect(m_ui->actionSelectDirectory, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionSelectFolder, &QAction::triggered, [this](bool)
   {
-    QFileDialog directorySelect(this);
-    directorySelect.setFileMode(QFileDialog::Directory);
-    directorySelect.setOption(QFileDialog::ShowDirsOnly, true);
-    directorySelect.setFilter(QDir::Dirs | QDir::Hidden | QDir::NoDotAndDotDot);
-    directorySelect.setDirectory(QDir::homePath());
-    if (directorySelect.exec())
+    QFileDialog folderSelect(this, QStringLiteral("Select Log Folder"));
+    folderSelect.setFileMode(QFileDialog::Directory);
+    folderSelect.setOption(QFileDialog::ShowDirsOnly, true);
+    folderSelect.setFilter(QDir::Dirs | QDir::Hidden | QDir::NoDotAndDotDot);
+    folderSelect.setDirectory(QDir::homePath());
+    if (folderSelect.exec())
     {
-      QStringList directories = directorySelect.selectedFiles();
-      if (!directories.isEmpty())
-        this->_refreshAvatars(directories.takeFirst());
+      QStringList folders = folderSelect.selectedFiles();
+      if (!folders.isEmpty())
+        this->_refreshAvatars(folders.takeFirst());
     }
   });
 
   // Connect the reset action.
-  QObject::connect(m_ui->actionReset, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionResetView, &QAction::triggered, [this](bool)
   {
     this->_refreshAvatars(m_logDir.path());
   });
 
   // Connect the refresh action.
-  QObject::connect(m_ui->actionRefresh, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionRefreshStats, &QAction::triggered, [this](bool)
   {
     this->_refreshStats(m_ui->comboBox->currentText());
   });
@@ -152,12 +152,12 @@ void MainWindow::_updateSortSettings(int column, int order)
   }
 }
 
-void MainWindow::_refreshAvatars(const QString &directory)
+void MainWindow::_refreshAvatars(const QString &folder)
 {
-  if (m_logDir.path() != directory)
+  if (m_logDir.path() != folder)
   {
-    m_settings.setValue(ms_dirEntry, directory);
-    m_logDir.setPath(directory);
+    m_settings.setValue(ms_folderEntry, folder);
+    m_logDir.setPath(folder);
   }
 
   // Clear out the avatar names.
@@ -263,17 +263,15 @@ void MainWindow::_refreshStats(const QString &avatarName)
       while (fields.size() >= 2)
       {
         static const QBrush blackBrush(QColor(0, 0, 0, 255));
+        static const QBrush darkGrayBrush(QColor(48, 48, 48, 255));
         static const QBrush grayBrush(QColor(96, 96, 96, 255));
-        static const QBrush darkerGrayBrush(QColor(48, 48, 48, 255));
-        static const QBrush blueBrush(QColor(0, 0, 128, 255));
-        static const QBrush redBrush(QColor(128, 0, 0, 255));
 
         static const QHash<QString, int> order = {
           {QStringLiteral("AdventurerLevel:"), 0},
-          {QStringLiteral("ProducerLevel:"), 0},
-          {QStringLiteral("VirtueCourage:"), 1},
-          {QStringLiteral("VirtueLove:"), 1},
-          {QStringLiteral("VirtueTruth:"), 1}
+          {QStringLiteral("ProducerLevel:"), 1},
+          {QStringLiteral("VirtueCourage:"), -1},
+          {QStringLiteral("VirtueLove:"), -1},
+          {QStringLiteral("VirtueTruth:"), -1}
         };
 
         QString text = fields.takeFirst();
@@ -287,31 +285,15 @@ void MainWindow::_refreshStats(const QString &avatarName)
           switch (iter.value())
           {
             case 0:
-              // Use black text for AdventurerLevel and ProducerLevel.
+              // Use the darkest text for top priority items.
               item->setForeground(0, blackBrush);
               item->setForeground(1, blackBrush);
               break;
 
             case 1:
-            {
-              const int virtueValue = value.toInt();
-
-              item->setForeground(0, darkerGrayBrush);
-              if (virtueValue > 0)
-              {
-                // The virtue value is greater than 0, so color it blue.
-                item->setForeground(1, blueBrush);
-              }
-              else if (virtueValue < 0)
-              {
-                // The virtue value is less than 0, so color it red.
-                item->setForeground(1, redBrush);
-              }
-              else
-                item->setForeground(1, darkerGrayBrush);
-
+              item->setForeground(0, darkGrayBrush);
+              item->setForeground(1, darkGrayBrush);
               break;
-            }
 
             default:
               item->setForeground(0, grayBrush);
@@ -319,7 +301,8 @@ void MainWindow::_refreshStats(const QString &avatarName)
               break;
           }
 
-          items[iter.value()].append(item);
+          if (iter.value() >= 0)
+            items[iter.value()].append(item);
         }
         else
         {
