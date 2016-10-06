@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent):
   // Get the settings before connecting to any signals.
   const QString folder = m_settings.value(ms_folderEntry, defaultFolder).toString();
   if (folder.isEmpty())
-    m_statusLabel->setText(QStringLiteral("Chat log folder not set."));
+    m_statusLabel->setText(tr("Chat log folder not set."));
   else
   {
     m_logDir.setPath(folder);
@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent):
   // Connect the select folder action.
   QObject::connect(m_ui->actionSelectFolder, &QAction::triggered, [this](bool)
   {
-    QFileDialog folderSelect(this, QStringLiteral("Select Log Folder"));
+    QFileDialog folderSelect(this, tr("Select Log Folder"));
     folderSelect.setFileMode(QFileDialog::Directory);
     folderSelect.setOption(QFileDialog::ShowDirsOnly, true);
     folderSelect.setFilter(QDir::Dirs | QDir::Hidden | QDir::NoDotAndDotDot);
@@ -167,7 +167,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
   auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_*_???\?-?\?-??.txt")});
   if (fileInfoList.isEmpty())
   {
-    m_statusLabel->setText(QStringLiteral("No log files found."));
+    m_statusLabel->setText(tr("No log files found."));
     return;
   }
 
@@ -192,7 +192,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
 
   if (nameSet.empty())
   {
-    m_statusLabel->setText(QStringLiteral("No log files found."));
+    m_statusLabel->setText(tr("No log files found."));
     return;
   }
 
@@ -227,7 +227,7 @@ void MainWindow::_refreshStats(const QString &avatarName)
   auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_%1_???\?-?\?-??.txt").arg(QString(avatarName).replace(QChar(' '), QChar('_')))});
   if (fileInfoList.isEmpty())
   {
-    m_statusLabel->setText(QStringLiteral("No log files found for %1.").arg(avatarName));
+    m_statusLabel->setText(tr("No log files found for %1.").arg(avatarName));
     return;
   }
 
@@ -262,10 +262,6 @@ void MainWindow::_refreshStats(const QString &avatarName)
       QMap<int, QList<QTreeWidgetItem*>> items;
       while (fields.size() >= 2)
       {
-        static const QBrush blackBrush(QColor(0, 0, 0, 255));
-        static const QBrush darkGrayBrush(QColor(48, 48, 48, 255));
-        static const QBrush grayBrush(QColor(96, 96, 96, 255));
-
         static const QHash<QString, int> order = {
           {QStringLiteral("AdventurerLevel:"), 0},
           {QStringLiteral("ProducerLevel:"), 1},
@@ -285,30 +281,54 @@ void MainWindow::_refreshStats(const QString &avatarName)
           switch (iter.value())
           {
             case 0:
-              // Use the darkest text for top priority items.
-              item->setForeground(0, blackBrush);
-              item->setForeground(1, blackBrush);
+              // Use the fully opaque brush for top priority items.
               break;
 
             case 1:
-              item->setForeground(0, darkGrayBrush);
-              item->setForeground(1, darkGrayBrush);
+            {
+              static QBrush brush;
+              if (brush.style() == Qt::NoBrush)
+              {
+                auto color = item->foreground(0).color();
+                brush = QBrush(QColor(color.red(), color.green(), color.blue(), 208));
+              }
+
+              item->setForeground(0, brush);
+              item->setForeground(1, brush);
               break;
+            }
 
             default:
-              item->setForeground(0, grayBrush);
-              item->setForeground(1, grayBrush);
+            {
+              static QBrush brush;
+              if (brush.style() == Qt::NoBrush)
+              {
+                auto color = item->foreground(0).color();
+                brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
+              }
+
+              item->setForeground(0, brush);
+              item->setForeground(1, brush);
               break;
+            }
           }
 
+          // Don't show items with negative priority.
           if (iter.value() >= 0)
             items[iter.value()].append(item);
         }
         else
         {
+          static QBrush brush;
+          if (brush.style() == Qt::NoBrush)
+          {
+            auto color = item->foreground(0).color();
+            brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
+          }
+
           // Fields not specifically in the ordering collection are put at the end.
-          item->setForeground(0, grayBrush);
-          item->setForeground(1, grayBrush);
+          item->setForeground(0, brush);
+          item->setForeground(1, brush);
           items[std::numeric_limits<int>::max()].append(item);
         }
       }
@@ -317,10 +337,10 @@ void MainWindow::_refreshStats(const QString &avatarName)
       for (auto iter = items.begin(); iter != items.end(); ++iter)
         m_ui->treeWidget->addTopLevelItems(iter.value());
 
-      m_statusLabel->setText(QStringLiteral("Showing stats for %1 from %2.").arg(avatarName).arg(dateTime));
+      m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatarName).arg(dateTime));
       return;
     }
   }
 
-  m_statusLabel->setText(QStringLiteral("No \"/stats\" found for %1.").arg(avatarName));
+  m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatarName));
 }
