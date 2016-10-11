@@ -37,7 +37,7 @@ private:
 
   void _updateSortSettings(int column, int order);
   void _refreshAvatars(const QString &folder);
-  void _refreshStats(const QString &avatarName);
+  void _refreshStats(const QString &avatarName, const QString &filter = {});
 };
 
 #endif // MAINWINDOW_H

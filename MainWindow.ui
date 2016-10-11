@@ -123,6 +123,8 @@
     <addaction name="actionResetView"/>
     <addaction name="actionRefreshStats"/>
     <addaction name="actionEnableSort"/>
+    <addaction name="separator"/>
+    <addaction name="actionSearch"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -164,6 +166,14 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="text">
+    <string>Search...</string>
+   </property>
+   <property name="toolTip">
+    <string>Search for items contatining the specified text</string>
    </property>
   </action>
  </widget>

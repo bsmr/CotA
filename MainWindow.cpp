@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include <QFileDialog>
+#include <QInputDialog>
 
 const QString MainWindow::ms_folderEntry = QStringLiteral("logFolder");
 const QString MainWindow::ms_avatarEntry = QStringLiteral("avatar");
@@ -130,6 +131,14 @@ MainWindow::MainWindow(QWidget *parent):
       this->_refreshStats(m_ui->comboBox->currentText());
     }
   });
+
+  // Connect the search action.
+  QObject::connect(m_ui->actionSearch, &QAction::triggered, [this](bool)
+  {
+    QString filter = QInputDialog::getText(this, tr("Search"), tr("Text:"));
+    if (!filter.isEmpty())
+      this->_refreshStats(m_ui->comboBox->currentText(), filter);
+  });
 }
 
 MainWindow::~MainWindow()
@@ -207,7 +216,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
   m_ui->comboBox->setCurrentIndex(-1);
 }
 
-void MainWindow::_refreshStats(const QString &avatarName)
+void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
 {
   if (m_avatar != avatarName)
   {
@@ -253,93 +262,96 @@ void MainWindow::_refreshStats(const QString &avatarName)
       }
     }
 
-    if (!stats.isEmpty())
+    if (stats.isEmpty())
+      continue;
+
+    // Split the text at spaces.
+    auto fields = stats.split(' ');
+
+    // Create a collection of text/value pair items.
+    QMap<int, QList<QTreeWidgetItem*>> items;
+    while (fields.size() >= 2)
     {
-      // Split the text at spaces.
-      auto fields = stats.split(' ');
+      static const QHash<QString, int> order = {
+        {QStringLiteral("AdventurerLevel:"), 0},
+        {QStringLiteral("ProducerLevel:"), 1},
+        {QStringLiteral("VirtueCourage:"), -1},
+        {QStringLiteral("VirtueLove:"), -1},
+        {QStringLiteral("VirtueTruth:"), -1}
+      };
 
-      // Create a collection of text/value pair items.
-      QMap<int, QList<QTreeWidgetItem*>> items;
-      while (fields.size() >= 2)
+      QString text = fields.takeFirst();
+      QString value = fields.takeFirst();
+
+      if (!filter.isEmpty() && !text.contains(filter, Qt::CaseInsensitive))
+        continue;
+
+      auto item = new QTreeWidgetItem({text, value});
+      auto iter = order.find(text);
+
+      if (iter != order.end())
       {
-        static const QHash<QString, int> order = {
-          {QStringLiteral("AdventurerLevel:"), 0},
-          {QStringLiteral("ProducerLevel:"), 1},
-          {QStringLiteral("VirtueCourage:"), -1},
-          {QStringLiteral("VirtueLove:"), -1},
-          {QStringLiteral("VirtueTruth:"), -1}
-        };
-
-        QString text = fields.takeFirst();
-        QString value = fields.takeFirst();
-
-        auto item = new QTreeWidgetItem({text, value});
-        auto iter = order.find(text);
-
-        if (iter != order.end())
+        switch (iter.value())
         {
-          switch (iter.value())
+          case 0:
+            // Use the fully opaque brush for top priority items.
+            break;
+
+          case 1:
           {
-            case 0:
-              // Use the fully opaque brush for top priority items.
-              break;
-
-            case 1:
+            static QBrush brush;
+            if (brush.style() == Qt::NoBrush)
             {
-              static QBrush brush;
-              if (brush.style() == Qt::NoBrush)
-              {
-                auto color = item->foreground(0).color();
-                brush = QBrush(QColor(color.red(), color.green(), color.blue(), 208));
-              }
-
-              item->setForeground(0, brush);
-              item->setForeground(1, brush);
-              break;
+              auto color = item->foreground(0).color();
+              brush = QBrush(QColor(color.red(), color.green(), color.blue(), 208));
             }
 
-            default:
-            {
-              static QBrush brush;
-              if (brush.style() == Qt::NoBrush)
-              {
-                auto color = item->foreground(0).color();
-                brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
-              }
-
-              item->setForeground(0, brush);
-              item->setForeground(1, brush);
-              break;
-            }
+            item->setForeground(0, brush);
+            item->setForeground(1, brush);
+            break;
           }
 
-          // Don't show items with negative priority.
-          if (iter.value() >= 0)
-            items[iter.value()].append(item);
-        }
-        else
-        {
-          static QBrush brush;
-          if (brush.style() == Qt::NoBrush)
+          default:
           {
-            auto color = item->foreground(0).color();
-            brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
-          }
+            static QBrush brush;
+            if (brush.style() == Qt::NoBrush)
+            {
+              auto color = item->foreground(0).color();
+              brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
+            }
 
-          // Fields not specifically in the ordering collection are put at the end.
-          item->setForeground(0, brush);
-          item->setForeground(1, brush);
-          items[std::numeric_limits<int>::max()].append(item);
+            item->setForeground(0, brush);
+            item->setForeground(1, brush);
+            break;
+          }
         }
+
+        // Don't show items with negative priority.
+        if (iter.value() >= 0)
+          items[iter.value()].append(item);
       }
+      else
+      {
+        static QBrush brush;
+        if (brush.style() == Qt::NoBrush)
+        {
+          auto color = item->foreground(0).color();
+          brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
+        }
 
-      // Add the items to the tree.
-      for (auto iter = items.begin(); iter != items.end(); ++iter)
-        m_ui->treeWidget->addTopLevelItems(iter.value());
-
-      m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatarName).arg(dateTime));
-      return;
+        // Fields not specifically in the ordering collection are put at the end.
+        item->setForeground(0, brush);
+        item->setForeground(1, brush);
+        items[std::numeric_limits<int>::max()].append(item);
+      }
     }
+
+    // Add the items to the tree.
+    for (auto iter = items.begin(); iter != items.end(); ++iter)
+      m_ui->treeWidget->addTopLevelItems(iter.value());
+
+    m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatarName).arg(dateTime));
+    return;
   }
 
   m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatarName));
