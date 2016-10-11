@@ -339,9 +339,10 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
           brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
         }
 
-        // Fields not specifically in the ordering collection are put at the end.
         item->setForeground(0, brush);
         item->setForeground(1, brush);
+
+        // Fields not specifically in the ordering collection are put at the end.
         items[std::numeric_limits<int>::max()].append(item);
       }
     }
@@ -350,7 +351,7 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
     for (auto iter = items.begin(); iter != items.end(); ++iter)
       m_ui->treeWidget->addTopLevelItems(iter.value());
 
-    m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatarName).arg(dateTime));
+    m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatarName, dateTime));
     return;
   }
 
