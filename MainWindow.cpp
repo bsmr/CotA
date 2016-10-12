@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 
 const QString MainWindow::ms_folderEntry = QStringLiteral("logFolder");
 const QString MainWindow::ms_avatarEntry = QStringLiteral("avatar");
@@ -138,6 +139,14 @@ MainWindow::MainWindow(QWidget *parent):
     QString filter = QInputDialog::getText(this, tr("Search"), tr("Text:"));
     if (!filter.isEmpty())
       this->_refreshStats(m_ui->comboBox->currentText(), filter);
+  });
+
+  // Connect the about action.
+  QObject::connect(m_ui->actionAbout, &QAction::triggered, [this](bool)
+  {
+    auto title = tr("About %1").arg(this->windowTitle());
+    auto message = tr("%1 version %2\nWritten and maintained by Barugon").arg(QApplication::applicationName(), QApplication::applicationVersion());
+    QMessageBox::about(this, title, message);
   });
 }
 
@@ -286,7 +295,7 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
       if (!filter.isEmpty() && !text.contains(filter, Qt::CaseInsensitive))
         continue;
 
-      auto item = new QTreeWidgetItem({text, value});
+      QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem({text, value}));
       auto iter = order.find(text);
 
       if (iter != order.end())
@@ -328,7 +337,7 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
 
         // Don't show items with negative priority.
         if (iter.value() >= 0)
-          items[iter.value()].append(item);
+          items[iter.value()].append(item.take());
       }
       else
       {
@@ -343,7 +352,7 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
         item->setForeground(1, brush);
 
         // Fields not specifically in the ordering collection are put at the end.
-        items[std::numeric_limits<int>::max()].append(item);
+        items[std::numeric_limits<int>::max()].append(item.take());
       }
     }
 
