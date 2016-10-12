@@ -3,9 +3,11 @@
 
 int main(int argc, char *argv[])
 {
-  QApplication a(argc, argv);
-  MainWindow w;
-  w.show();
+  QApplication application(argc, argv);
+  application.setApplicationVersion(QStringLiteral(APP_VERSION));
 
-  return a.exec();
+  MainWindow window;
+  window.show();
+
+  return application.exec();
 }
