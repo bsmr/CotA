@@ -5,6 +5,40 @@
 #include <QLabel>
 #include <QMessageBox>
 
+/* -----{ MainWindow::ItemBrushes }----- */
+
+MainWindow::ItemBrushes::ItemBrushes()
+{
+  this->reset();
+}
+
+const QBrush& MainWindow::ItemBrushes::heavy() const
+{
+  return m_heavy;
+}
+
+const QBrush& MainWindow::ItemBrushes::medium() const
+{
+  return m_medium;
+}
+
+const QBrush& MainWindow::ItemBrushes::light() const
+{
+  return m_light;
+}
+
+void MainWindow::ItemBrushes::reset()
+{
+  QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
+  auto color = item->foreground(0).color();
+
+  m_heavy = QBrush(QColor(color.red(), color.green(), color.blue(), heavyAlpha));
+  m_medium = QBrush(QColor(color.red(), color.green(), color.blue(), mediumAlpha));
+  m_light = QBrush(QColor(color.red(), color.green(), color.blue(), lightAlpha));
+}
+
+/* -----{ MainWindow }----- */
+
 const QString MainWindow::ms_folderEntry(QStringLiteral("logFolder"));
 const QString MainWindow::ms_avatarEntry(QStringLiteral("avatar"));
 const QString MainWindow::ms_enableSortEntry(QStringLiteral("enableSort"));
@@ -345,36 +379,4 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
   }
 
   m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatarName));
-}
-
-/* -----{ MainWindow::ItemBrushes }----- */
-
-MainWindow::ItemBrushes::ItemBrushes()
-{
-  this->reset();
-}
-
-const QBrush& MainWindow::ItemBrushes::heavy() const
-{
-  return m_heavy;
-}
-
-const QBrush& MainWindow::ItemBrushes::medium() const
-{
-  return m_medium;
-}
-
-const QBrush& MainWindow::ItemBrushes::light() const
-{
-  return m_light;
-}
-
-void MainWindow::ItemBrushes::reset()
-{
-  QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
-  auto color = item->foreground(0).color();
-
-  m_heavy = QBrush(QColor(color.red(), color.green(), color.blue(), heavyAlpha));
-  m_medium = QBrush(QColor(color.red(), color.green(), color.blue(), mediumAlpha));
-  m_light = QBrush(QColor(color.red(), color.green(), color.blue(), lightAlpha));
 }
