@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent):
     m_ui->actionEnableSort->setChecked(true);
     m_ui->treeWidget->setSortingEnabled(true);
     m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
-    m_sortIndicatorConnetion = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, [this](int column, Qt::SortOrder order)
+    m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, [this](int column, Qt::SortOrder order)
     {
       this->_updateSortSettings(column, int(order));
     });
@@ -108,8 +108,8 @@ MainWindow::MainWindow(QWidget *parent):
   QObject::connect(m_ui->actionEnableSort, &QAction::triggered, [this](bool checked)
   {
     // Disconnect the previous header indicator connection to prevent it from being called when sorting is enabled.
-    if (m_sortIndicatorConnetion)
-      QObject::disconnect(m_sortIndicatorConnetion);
+    if (m_sortIndicatorConnection)
+      QObject::disconnect(m_sortIndicatorConnection);
 
     m_settings.setValue(ms_enableSortEntry, checked);
     m_ui->treeWidget->setSortingEnabled(checked);
@@ -119,7 +119,7 @@ MainWindow::MainWindow(QWidget *parent):
       m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
 
       // Connect the header indicator signal.
-      m_sortIndicatorConnetion = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, [this](int column, Qt::SortOrder order)
+      m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, [this](int column, Qt::SortOrder order)
       {
         this->_updateSortSettings(column, int(order));
       });

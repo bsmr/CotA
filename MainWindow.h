@@ -50,7 +50,7 @@ class MainWindow: public QMainWindow
   QString m_avatar;
   QDir m_logDir;
 
-  QMetaObject::Connection m_sortIndicatorConnetion;
+  QMetaObject::Connection m_sortIndicatorConnection;
   int m_sortColumn {0};
   int m_sortOrder {0};
 
