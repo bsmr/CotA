@@ -1,5 +1,5 @@
 # Companion of the Avatar
-CotA is a small application to display the stats ("/stats") recorded to a chat log file from Shroud of the Avatar. 
+CotA is a small application to nicely display the stats ("/stats") recorded to a chat log file from Shroud of the Avatar. 
 
 ![screenshot](http://m8.i.pbase.com/o9/09/605909/1/164136608.Pdu4UgZq.Screenshotfrom20160929170248.png)
 
