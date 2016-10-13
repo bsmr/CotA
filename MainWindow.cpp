@@ -2,18 +2,19 @@
 #include "ui_MainWindow.h"
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QLabel>
 #include <QMessageBox>
 
-const QString MainWindow::ms_folderEntry = QStringLiteral("logFolder");
-const QString MainWindow::ms_avatarEntry = QStringLiteral("avatar");
-const QString MainWindow::ms_enableSortEntry = QStringLiteral("enableSort");
-const QString MainWindow::ms_sortColumnEntry = QStringLiteral("sortColumn");
-const QString MainWindow::ms_sortOrderEntry = QStringLiteral("sortOrder");
+const QString MainWindow::ms_folderEntry(QStringLiteral("logFolder"));
+const QString MainWindow::ms_avatarEntry(QStringLiteral("avatar"));
+const QString MainWindow::ms_enableSortEntry(QStringLiteral("enableSort"));
+const QString MainWindow::ms_sortColumnEntry(QStringLiteral("sortColumn"));
+const QString MainWindow::ms_sortOrderEntry(QStringLiteral("sortOrder"));
 
 MainWindow::MainWindow(QWidget *parent):
   QMainWindow(parent),
   m_ui(new Ui::MainWindow),
-  m_statusLabel(new QLabel),
+  m_statusLabel {new QLabel},
   m_settings(QStringLiteral("Barugon"), QStringLiteral("Companion of the Avatar"))
 {
   m_ui->setupUi(this);
@@ -156,7 +157,6 @@ MainWindow::MainWindow(QWidget *parent):
 
 MainWindow::~MainWindow()
 {
-  delete m_ui;
 }
 
 void MainWindow::_updateSortSettings(int column, int order)
@@ -214,7 +214,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
 
   if (nameSet.empty())
   {
-    m_statusLabel->setText(tr("No log files found."));
+    m_statusLabel->setText(tr("No avatars found."));
     return;
   }
 
@@ -347,51 +347,34 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
   m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatarName));
 }
 
-/* -----{ MainWindow::Brushes }----- */
+/* -----{ MainWindow::ItemBrushes }----- */
 
-MainWindow::Brushes::Brushes()
+MainWindow::ItemBrushes::ItemBrushes()
 {
+  this->reset();
 }
 
-const QBrush& MainWindow::Brushes::heavy() const
+const QBrush& MainWindow::ItemBrushes::heavy() const
 {
-  if (m_heavy.style() == Qt::NoBrush)
-  {
-    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
-    auto color = item->foreground(0).color();
-    m_heavy = QBrush(QColor(color.red(), color.green(), color.blue(), heavyAlpha));
-  }
-
   return m_heavy;
 }
 
-const QBrush& MainWindow::Brushes::medium() const
+const QBrush& MainWindow::ItemBrushes::medium() const
 {
-  if (m_medium.style() == Qt::NoBrush)
-  {
-    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
-    auto color = item->foreground(0).color();
-    m_medium = QBrush(QColor(color.red(), color.green(), color.blue(), mediumAlpha));
-  }
-
   return m_medium;
 }
 
-const QBrush& MainWindow::Brushes::light() const
+const QBrush& MainWindow::ItemBrushes::light() const
 {
-  if (m_light.style() == Qt::NoBrush)
-  {
-    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
-    auto color = item->foreground(0).color();
-    m_light = QBrush(QColor(color.red(), color.green(), color.blue(), lightAlpha));
-  }
-
   return m_light;
 }
 
-void MainWindow::Brushes::reset()
+void MainWindow::ItemBrushes::reset()
 {
-  m_heavy = QBrush();
-  m_medium = QBrush();
-  m_light = QBrush();
+  QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
+  auto color = item->foreground(0).color();
+
+  m_heavy = QBrush(QColor(color.red(), color.green(), color.blue(), heavyAlpha));
+  m_medium = QBrush(QColor(color.red(), color.green(), color.blue(), mediumAlpha));
+  m_light = QBrush(QColor(color.red(), color.green(), color.blue(), lightAlpha));
 }

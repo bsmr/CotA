@@ -2,9 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QDir>
-#include <QLabel>
 #include <QMainWindow>
 #include <QSettings>
+
+class QLabel;
 
 namespace Ui
 {
@@ -13,14 +14,7 @@ namespace Ui
 
 class MainWindow: public QMainWindow
 {
-  Q_OBJECT
-
-public:
-  explicit MainWindow(QWidget *parent = nullptr);
-  ~MainWindow();
-
-private:
-  class Brushes
+  class ItemBrushes
   {
     enum {
       heavyAlpha = 255,
@@ -28,15 +22,12 @@ private:
       lightAlpha = 159,
     };
 
-    mutable QBrush m_heavy;
-    mutable QBrush m_medium;
-    mutable QBrush m_light;
+    QBrush m_heavy;
+    QBrush m_medium;
+    QBrush m_light;
 
   public:
-    Brushes();
-
-    Brushes(const Brushes&) = delete;
-    const Brushes& operator =(const Brushes&) = delete;
+    ItemBrushes();
 
     const QBrush& heavy() const;
     const QBrush& medium() const;
@@ -51,18 +42,23 @@ private:
   static const QString ms_sortColumnEntry;
   static const QString ms_sortOrderEntry;
 
-  Ui::MainWindow *m_ui{nullptr};
-  QLabel *m_statusLabel{nullptr};
+  QScopedPointer<Ui::MainWindow> m_ui;
+  QLabel *m_statusLabel {nullptr};
 
-  Brushes m_itemBrushes;
+  ItemBrushes m_itemBrushes;
   QSettings m_settings;
   QString m_avatar;
   QDir m_logDir;
 
   QMetaObject::Connection m_sortIndicatorConnetion;
-  int m_sortColumn{0};
-  int m_sortOrder{0};
+  int m_sortColumn {0};
+  int m_sortOrder {0};
 
+public:
+  explicit MainWindow(QWidget *parent = nullptr);
+  ~MainWindow();
+
+private:
   void _updateSortSettings(int column, int order);
   void _refreshAvatars(const QString &folder);
   void _refreshStats(const QString &avatarName, const QString &filter = {});
