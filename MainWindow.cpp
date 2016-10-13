@@ -27,10 +27,7 @@ MainWindow::MainWindow(QWidget *parent):
   m_logDir.setFilter(QDir::Files);
   m_logDir.setSorting(QDir::Name | QDir::Reversed);
 
-#if defined(Q_OS_LINUX)
-  const QString defaultFolder = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
-#elif defined(Q_OS_OSX)
-  // This path is probably wrong.
+#if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
   const QString defaultFolder = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
 #elif defined(Q_OS_WIN32)
   const QString defaultFolder = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
@@ -148,6 +145,13 @@ MainWindow::MainWindow(QWidget *parent):
     auto message = tr("%1 version %2\nWritten and maintained by Barugon").arg(QApplication::applicationName(), QApplication::applicationVersion());
     QMessageBox::about(this, title, message);
   });
+
+  // Connect to the applications palette changed signal to detect theme changes.
+  QObject::connect(static_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::paletteChanged, [this](const QPalette&)
+  {
+    m_itemBrushes.reset();
+    this->_refreshStats(m_ui->comboBox->currentText());
+  });
 }
 
 MainWindow::~MainWindow()
@@ -193,7 +197,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
   QSet<QString> nameSet;
 
   // Extract the avatar names.
-  for (auto& fileInfo: fileInfoList)
+  for (auto &fileInfo: fileInfoList)
   {
     QString name = fileInfo.baseName();
     int pos = name.lastIndexOf(QChar('_'));
@@ -216,7 +220,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
 
   // Sort the names.
   QStringList nameList;
-  for (auto& name: nameSet)
+  for (auto &name: nameSet)
     nameList.append(name);
   nameList.sort();
 
@@ -249,7 +253,7 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
     return;
   }
 
-  for (auto& fileInfo: fileInfoList)
+  for (auto &fileInfo: fileInfoList)
   {
     // Attempt to open the log file.
     QFile file(fileInfo.filePath());
@@ -303,36 +307,19 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
         switch (iter.value())
         {
           case 0:
-            // Use the fully opaque brush for top priority items.
+            item->setForeground(0, m_itemBrushes.heavy());
+            item->setForeground(1, m_itemBrushes.heavy());
             break;
 
           case 1:
-          {
-            static QBrush brush;
-            if (brush.style() == Qt::NoBrush)
-            {
-              auto color = item->foreground(0).color();
-              brush = QBrush(QColor(color.red(), color.green(), color.blue(), 208));
-            }
-
-            item->setForeground(0, brush);
-            item->setForeground(1, brush);
+            item->setForeground(0, m_itemBrushes.medium());
+            item->setForeground(1, m_itemBrushes.medium());
             break;
-          }
 
           default:
-          {
-            static QBrush brush;
-            if (brush.style() == Qt::NoBrush)
-            {
-              auto color = item->foreground(0).color();
-              brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
-            }
-
-            item->setForeground(0, brush);
-            item->setForeground(1, brush);
+            item->setForeground(0, m_itemBrushes.light());
+            item->setForeground(1, m_itemBrushes.light());
             break;
-          }
         }
 
         // Don't show items with negative priority.
@@ -341,15 +328,8 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
       }
       else
       {
-        static QBrush brush;
-        if (brush.style() == Qt::NoBrush)
-        {
-          auto color = item->foreground(0).color();
-          brush = QBrush(QColor(color.red(), color.green(), color.blue(), 160));
-        }
-
-        item->setForeground(0, brush);
-        item->setForeground(1, brush);
+        item->setForeground(0, m_itemBrushes.light());
+        item->setForeground(1, m_itemBrushes.light());
 
         // Fields not specifically in the ordering collection are put at the end.
         items[std::numeric_limits<int>::max()].append(item.take());
@@ -365,4 +345,53 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
   }
 
   m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatarName));
+}
+
+/* -----{ MainWindow::Brushes }----- */
+
+MainWindow::Brushes::Brushes()
+{
+}
+
+const QBrush& MainWindow::Brushes::heavy() const
+{
+  if (m_heavy.style() == Qt::NoBrush)
+  {
+    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
+    auto color = item->foreground(0).color();
+    m_heavy = QBrush(QColor(color.red(), color.green(), color.blue(), heavyAlpha));
+  }
+
+  return m_heavy;
+}
+
+const QBrush& MainWindow::Brushes::medium() const
+{
+  if (m_medium.style() == Qt::NoBrush)
+  {
+    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
+    auto color = item->foreground(0).color();
+    m_medium = QBrush(QColor(color.red(), color.green(), color.blue(), mediumAlpha));
+  }
+
+  return m_medium;
+}
+
+const QBrush& MainWindow::Brushes::light() const
+{
+  if (m_light.style() == Qt::NoBrush)
+  {
+    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem());
+    auto color = item->foreground(0).color();
+    m_light = QBrush(QColor(color.red(), color.green(), color.blue(), lightAlpha));
+  }
+
+  return m_light;
+}
+
+void MainWindow::Brushes::reset()
+{
+  m_heavy = QBrush();
+  m_medium = QBrush();
+  m_light = QBrush();
 }
