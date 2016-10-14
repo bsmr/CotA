@@ -304,8 +304,13 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
       int pos = line.indexOf("AdventurerLevel:");
       if (pos > 0)
       {
-        stats = line.mid(pos);
-        dateTime = line.mid(1, pos - 3);
+        // In case AdventurerLevel is not the first item.
+        pos = line.indexOf("] ");
+        if (!(pos > 0))
+          continue;
+
+        stats = line.mid(pos + 2);
+        dateTime = line.mid(1, pos - 1);
       }
     }
 
