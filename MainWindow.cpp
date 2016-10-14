@@ -231,7 +231,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
   QSet<QString> nameSet;
 
   // Extract the avatar names.
-  for (auto &fileInfo: fileInfoList)
+  for (const auto &fileInfo: fileInfoList)
   {
     QString name = fileInfo.baseName();
     int pos = name.lastIndexOf(QChar('_'));
@@ -254,7 +254,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
 
   // Sort the names.
   QStringList nameList;
-  for (auto &name: nameSet)
+  for (const auto &name: nameSet)
     nameList.append(name);
   nameList.sort();
 
@@ -280,7 +280,7 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
   }
 
   // Get a list of log files that match the avatar's name ("\?" is used here to avoid warnings about trigraphs).
-  auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_%1_???\?-?\?-??.txt").arg(QString(avatarName).replace(QChar(' '), QChar('_')))});
+  const auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_%1_???\?-?\?-??.txt").arg(QString(avatarName).replace(QChar(' '), QChar('_')))});
   if (fileInfoList.isEmpty())
   {
     m_statusLabel->setText(tr("No log files found for %1.").arg(avatarName));
@@ -300,11 +300,11 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
     // Search for the last "/stats" entry.
     while (!file.atEnd())
     {
-      QByteArray line = file.readLine();
+      const QByteArray line = file.readLine();
       int pos = line.indexOf("AdventurerLevel:");
       if (pos > 0)
       {
-        // In case AdventurerLevel is not the first item.
+        // In case AdventurerLevel is not the first item....
         pos = line.indexOf("] ");
         if (!(pos > 0))
           continue;
@@ -332,11 +332,16 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
         {QStringLiteral("VirtueTruth:"), -1}
       };
 
-      QString text = fields.takeFirst();
-      QString value = fields.takeFirst();
+      const QString text = fields.takeFirst();
+      const QString value = fields.takeFirst();
 
-      if (!filter.isEmpty() && !text.contains(filter, Qt::CaseInsensitive))
-        continue;
+      bool searched = false;
+      if (!filter.isEmpty())
+      {
+        searched = text.contains(filter, Qt::CaseInsensitive);
+        if (!searched)
+          continue;
+      }
 
       QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem({text, value}));
       auto iter = order.find(text);
@@ -361,8 +366,8 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
             break;
         }
 
-        // Don't show items with negative priority.
-        if (iter.value() >= 0)
+        // Don't show items with negative priority (unless they're explicitly searched for).
+        if ((iter.value() >= 0) || searched)
           items[iter.value()].append(item.take());
       }
       else
