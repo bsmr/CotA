@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 1.0.3
+VERSION = 1.1.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 QT += core gui
@@ -14,13 +14,16 @@ TARGET = CotA
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    MainWindow.cpp
+    MainWindow.cpp \
+    NotesDialog.cpp
 
 HEADERS += \
-    MainWindow.h
+    MainWindow.h \
+    NotesDialog.h
 
 FORMS += \
-    MainWindow.ui
+    MainWindow.ui \
+    NotesDialog.ui
 
 RESOURCES += \
     resource.qrc
