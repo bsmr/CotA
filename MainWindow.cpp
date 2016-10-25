@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "NotesDialog.h"
 #include "ui_MainWindow.h"
 #include <QFileDialog>
 #include <QInputDialog>
@@ -124,6 +125,18 @@ MainWindow::MainWindow(QWidget *parent):
       if (!folders.isEmpty())
         this->_refreshAvatars(folders.takeFirst());
     }
+  });
+
+  // Connect the note button signal.
+  QObject::connect(m_ui->notesButton, &QAbstractButton::clicked, [this](bool)
+  {
+    auto avatar = m_ui->comboBox->currentText();
+    if (avatar.isEmpty())
+      return;
+
+    NotesDialog notesDialog(this, tr("Notes for %1").arg(avatar), m_settings.value(avatar).toString());
+    if (notesDialog.exec() == QDialog::Accepted)
+      m_settings.setValue(avatar, notesDialog.text());
   });
 
   // Connect the reset action.
@@ -273,11 +286,15 @@ void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
 
   // Clear out the stats.
   m_ui->treeWidget->clear();
+
   if (avatarName.isEmpty())
   {
     m_statusLabel->clear();
+    m_ui->notesButton->setEnabled(false);
     return;
   }
+
+  m_ui->notesButton->setEnabled(true);
 
   // Get a list of log files that match the avatar's name ("\?" is used here to avoid warnings about trigraphs).
   const auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_%1_???\?-?\?-??.txt").arg(QString(avatarName).replace(QChar(' '), QChar('_')))});
