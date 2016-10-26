@@ -140,7 +140,7 @@
     <addaction name="actionRefreshStats"/>
     <addaction name="actionEnableSort"/>
     <addaction name="separator"/>
-    <addaction name="actionSearch"/>
+    <addaction name="actionFilter"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -191,12 +191,12 @@
     <string>F5</string>
    </property>
   </action>
-  <action name="actionSearch">
+  <action name="actionFilter">
    <property name="text">
-    <string>Search...</string>
+    <string>Filter stats...</string>
    </property>
    <property name="toolTip">
-    <string>Search for items contatining the specified text</string>
+    <string>Filter the stats to only those that include the specified text</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>

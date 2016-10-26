@@ -43,7 +43,7 @@ class MainWindow: public QMainWindow
   static const QString ms_sortOrderEntry;
 
   QScopedPointer<Ui::MainWindow> m_ui;
-  QLabel *m_statusLabel {nullptr};
+  QLabel *m_statusLabel{nullptr};
 
   ItemBrushes m_itemBrushes;
   QSettings m_settings;
@@ -51,8 +51,8 @@ class MainWindow: public QMainWindow
   QDir m_logDir;
 
   QMetaObject::Connection m_sortIndicatorConnection;
-  int m_sortColumn {0};
-  int m_sortOrder {0};
+  int m_sortColumn{0};
+  int m_sortOrder{0};
 
 public:
   explicit MainWindow(QWidget *parent = nullptr);

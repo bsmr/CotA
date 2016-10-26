@@ -49,7 +49,7 @@ const QString MainWindow::ms_sortOrderEntry(QStringLiteral("sortOrder"));
 MainWindow::MainWindow(QWidget *parent):
   QMainWindow(parent),
   m_ui(new Ui::MainWindow),
-  m_statusLabel {new QLabel},
+  m_statusLabel{new QLabel},
   m_settings(QStringLiteral("Barugon"), QStringLiteral("Companion of the Avatar"))
 {
   m_ui->setupUi(this);
@@ -178,10 +178,10 @@ MainWindow::MainWindow(QWidget *parent):
     }
   });
 
-  // Connect the search action.
-  QObject::connect(m_ui->actionSearch, &QAction::triggered, [this](bool)
+  // Connect the filter action.
+  QObject::connect(m_ui->actionFilter, &QAction::triggered, [this](bool)
   {
-    QString filter = QInputDialog::getText(this, tr("Search"), tr("Text:"));
+    QString filter = QInputDialog::getText(this, tr("Filter Stats"), tr("Text:"));
     if (!filter.isEmpty())
       this->_refreshStats(m_ui->comboBox->currentText(), filter);
   });
