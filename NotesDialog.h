@@ -15,6 +15,9 @@ public:
 
   QString text() const;
 
+protected:
+  void showEvent(QShowEvent*) override;
+
 private:
   QScopedPointer<Ui::NotesDialog> m_ui;
 };

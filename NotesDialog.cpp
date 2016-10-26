@@ -18,3 +18,11 @@ QString NotesDialog::text() const
 NotesDialog::~NotesDialog()
 {
 }
+
+void NotesDialog::showEvent(QShowEvent */*event*/)
+{
+  // Reposition the dialog so that it's centered on the main window.
+  auto parent = this->parentWidget();
+  if (parent)
+    this->move(parent->x() + (parent->width() - this->width()) / 2, parent->y() + (parent->height() - this->height()) / 2);
+}
