@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "NotesDialog.h"
 #include "ui_MainWindow.h"
+
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QLabel>
@@ -13,17 +14,17 @@ MainWindow::ItemBrushes::ItemBrushes()
   this->reset();
 }
 
-const QBrush& MainWindow::ItemBrushes::heavy() const
+const QBrush & MainWindow::ItemBrushes::heavy() const
 {
   return m_heavy;
 }
 
-const QBrush& MainWindow::ItemBrushes::medium() const
+const QBrush & MainWindow::ItemBrushes::medium() const
 {
   return m_medium;
 }
 
-const QBrush& MainWindow::ItemBrushes::light() const
+const QBrush & MainWindow::ItemBrushes::light() const
 {
   return m_light;
 }
@@ -46,7 +47,7 @@ const QString MainWindow::ms_enableSortEntry(QStringLiteral("enableSort"));
 const QString MainWindow::ms_sortColumnEntry(QStringLiteral("sortColumn"));
 const QString MainWindow::ms_sortOrderEntry(QStringLiteral("sortOrder"));
 
-MainWindow::MainWindow(QWidget *parent):
+MainWindow::MainWindow(QWidget * parent):
   QMainWindow(parent),
   m_ui(new Ui::MainWindow),
   m_statusLabel{new QLabel},
@@ -189,9 +190,8 @@ MainWindow::MainWindow(QWidget *parent):
   // Connect the about action.
   QObject::connect(m_ui->actionAbout, &QAction::triggered, [this](bool)
   {
-    auto title = tr("About %1").arg(this->windowTitle());
     auto message = tr("%1 version %2\nWritten and maintained by Barugon").arg(QApplication::applicationName(), QApplication::applicationVersion());
-    QMessageBox::about(this, title, message);
+    QMessageBox::about(this, tr("About %1").arg(this->windowTitle()), message);
   });
 
   // Connect to the applications palette changed signal to detect theme changes.
@@ -221,7 +221,7 @@ void MainWindow::_updateSortSettings(int column, int order)
   }
 }
 
-void MainWindow::_refreshAvatars(const QString &folder)
+void MainWindow::_refreshAvatars(const QString & folder)
 {
   if (m_logDir.path() != folder)
   {
@@ -276,7 +276,7 @@ void MainWindow::_refreshAvatars(const QString &folder)
   m_ui->comboBox->setCurrentIndex(-1);
 }
 
-void MainWindow::_refreshStats(const QString &avatarName, const QString &filter)
+void MainWindow::_refreshStats(const QString & avatarName, const QString & filter)
 {
   if (m_avatar != avatarName)
   {

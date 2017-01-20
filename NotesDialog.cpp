@@ -1,7 +1,7 @@
 #include "NotesDialog.h"
 #include "ui_NotesDialog.h"
 
-NotesDialog::NotesDialog(QWidget *parent, const QString &title, const QString &text):
+NotesDialog::NotesDialog(QWidget * parent, const QString & title, const QString & text):
   QDialog(parent),
   m_ui(new Ui::NotesDialog)
 {
@@ -19,7 +19,7 @@ NotesDialog::~NotesDialog()
 {
 }
 
-void NotesDialog::showEvent(QShowEvent */*event*/)
+void NotesDialog::showEvent(QShowEvent * /*event*/)
 {
   // Reposition the dialog so that it's centered on the main window.
   auto parent = this->parentWidget();

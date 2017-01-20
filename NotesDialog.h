@@ -3,20 +3,21 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
   class NotesDialog;
 }
 
 class NotesDialog: public QDialog
 {
 public:
-  explicit NotesDialog(QWidget *parent, const QString &title, const QString &text);
+  explicit NotesDialog(QWidget * parent, const QString & title, const QString & text);
   ~NotesDialog();
 
   QString text() const;
 
 protected:
-  void showEvent(QShowEvent*) override;
+  void showEvent(QShowEvent *) override;
 
 private:
   QScopedPointer<Ui::NotesDialog> m_ui;

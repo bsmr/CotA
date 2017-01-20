@@ -29,9 +29,9 @@ class MainWindow: public QMainWindow
   public:
     ItemBrushes();
 
-    const QBrush& heavy() const;
-    const QBrush& medium() const;
-    const QBrush& light() const;
+    const QBrush & heavy() const;
+    const QBrush & medium() const;
+    const QBrush & light() const;
 
     void reset();
   };
@@ -43,7 +43,7 @@ class MainWindow: public QMainWindow
   static const QString ms_sortOrderEntry;
 
   QScopedPointer<Ui::MainWindow> m_ui;
-  QLabel *m_statusLabel{nullptr};
+  QLabel * m_statusLabel{nullptr};
 
   ItemBrushes m_itemBrushes;
   QSettings m_settings;
@@ -55,13 +55,13 @@ class MainWindow: public QMainWindow
   int m_sortOrder{0};
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(QWidget * parent = nullptr);
   ~MainWindow();
 
 private:
   void _updateSortSettings(int column, int order);
-  void _refreshAvatars(const QString &folder);
-  void _refreshStats(const QString &avatarName, const QString &filter = {});
+  void _refreshAvatars(const QString & folder);
+  void _refreshStats(const QString & avatarName, const QString & filter = {});
 };
 
 #endif // MAINWINDOW_H
