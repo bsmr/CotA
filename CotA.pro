@@ -7,8 +7,7 @@
 VERSION = 1.1.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
-QT += core gui
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += core gui widgets
 
 TARGET = CotA
 TEMPLATE = app
