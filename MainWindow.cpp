@@ -56,6 +56,9 @@ MainWindow::MainWindow(QWidget * parent):
   m_ui->setupUi(this);
   m_ui->statusBar->addWidget(m_statusLabel);
 
+  this->addAction(m_ui->actionRefreshStats);
+  this->addAction(m_ui->actionFilter);
+
   // Set the tree-view header so that it will resize to the contents.
   m_ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
   m_ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
