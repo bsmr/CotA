@@ -56,9 +56,6 @@ MainWindow::MainWindow(QWidget * parent):
   m_ui->setupUi(this);
   m_ui->statusBar->addWidget(m_statusLabel);
 
-  this->addAction(m_ui->actionRefreshStats);
-  this->addAction(m_ui->actionFilter);
-
   // Set the tree-view header so that it will resize to the contents.
   m_ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
   m_ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -66,6 +63,11 @@ MainWindow::MainWindow(QWidget * parent):
   // Set the directory search parameters so that the most recent log files are found first.
   m_logDir.setFilter(QDir::Files);
   m_logDir.setSorting(QDir::Name | QDir::Reversed);
+
+  // Add these actions to the main window so that the shortcut keys work.
+  this->addAction(m_ui->actionQuit);
+  this->addAction(m_ui->actionRefreshStats);
+  this->addAction(m_ui->actionFilter);
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
   const QString defaultFolder = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
@@ -103,20 +105,26 @@ MainWindow::MainWindow(QWidget * parent):
     m_ui->actionEnableSort->setChecked(true);
     m_ui->treeWidget->setSortingEnabled(true);
     m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
-    m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, [this](int column, Qt::SortOrder order)
+    m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, this, [this](int column, Qt::SortOrder order)
     {
       this->_updateSortSettings(column, int(order));
     });
   }
 
+  // Connect the quit action.
+  QObject::connect(m_ui->actionQuit, &QAction::triggered, this, [this](bool)
+  {
+    this->close();
+  });
+
   // Connect the changed signal of the avatar name combo-box.
-  QObject::connect(m_ui->comboBox, &QComboBox::currentTextChanged, [this](const QString &text)
+  QObject::connect(m_ui->comboBox, &QComboBox::currentTextChanged, this, [this](const QString &text)
   {
     this->_refreshStats(text);
   });
 
   // Connect the select folder action.
-  QObject::connect(m_ui->actionSelectFolder, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionSelectFolder, &QAction::triggered, this, [this](bool)
   {
     QFileDialog folderSelect(this, tr("Select Log Folder"));
     folderSelect.setFileMode(QFileDialog::Directory);
@@ -132,7 +140,7 @@ MainWindow::MainWindow(QWidget * parent):
   });
 
   // Connect the note button signal.
-  QObject::connect(m_ui->notesButton, &QAbstractButton::clicked, [this](bool)
+  QObject::connect(m_ui->notesButton, &QAbstractButton::clicked, this, [this](bool)
   {
     auto avatar = m_ui->comboBox->currentText();
     if (avatar.isEmpty())
@@ -144,19 +152,19 @@ MainWindow::MainWindow(QWidget * parent):
   });
 
   // Connect the reset action.
-  QObject::connect(m_ui->actionResetView, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionResetView, &QAction::triggered, this, [this](bool)
   {
     this->_refreshAvatars(m_logDir.path());
   });
 
   // Connect the refresh action.
-  QObject::connect(m_ui->actionRefreshStats, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionRefreshStats, &QAction::triggered, this, [this](bool)
   {
     this->_refreshStats(m_ui->comboBox->currentText());
   });
 
   // Connect the enable sort action.
-  QObject::connect(m_ui->actionEnableSort, &QAction::triggered, [this](bool checked)
+  QObject::connect(m_ui->actionEnableSort, &QAction::triggered, this, [this](bool checked)
   {
     // Disconnect the previous header indicator connection to prevent it from being called when sorting is enabled.
     if (m_sortIndicatorConnection)
@@ -170,7 +178,7 @@ MainWindow::MainWindow(QWidget * parent):
       m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
 
       // Connect the header indicator signal.
-      m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, [this](int column, Qt::SortOrder order)
+      m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, this, [this](int column, Qt::SortOrder order)
       {
         this->_updateSortSettings(column, int(order));
       });
@@ -183,7 +191,7 @@ MainWindow::MainWindow(QWidget * parent):
   });
 
   // Connect the filter action.
-  QObject::connect(m_ui->actionFilter, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionFilter, &QAction::triggered, this, [this](bool)
   {
     QString filter = QInputDialog::getText(this, tr("Filter Stats"), tr("Text:"));
     if (!filter.isEmpty())
@@ -191,14 +199,14 @@ MainWindow::MainWindow(QWidget * parent):
   });
 
   // Connect the about action.
-  QObject::connect(m_ui->actionAbout, &QAction::triggered, [this](bool)
+  QObject::connect(m_ui->actionAbout, &QAction::triggered, this, [this](bool)
   {
     auto message = tr("%1 version %2\nWritten and maintained by Barugon").arg(QApplication::applicationName(), QApplication::applicationVersion());
     QMessageBox::about(this, tr("About %1").arg(this->windowTitle()), message);
   });
 
   // Connect to the applications palette changed signal to detect theme changes.
-  QObject::connect(static_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::paletteChanged, [this](const QPalette&)
+  QObject::connect(static_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::paletteChanged, this, [this](const QPalette&)
   {
     m_itemBrushes.reset();
     this->_refreshStats(m_ui->comboBox->currentText());
