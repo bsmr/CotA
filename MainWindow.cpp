@@ -60,10 +60,6 @@ MainWindow::MainWindow(QWidget * parent):
   m_ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
   m_ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
-  // Set the directory search parameters so that the most recent log files are found first.
-  m_logDir.setFilter(QDir::Files);
-  m_logDir.setSorting(QDir::Name | QDir::Reversed);
-
   // Add these actions to the main window so that the shortcut keys work.
   this->addAction(m_ui->actionQuit);
   this->addAction(m_ui->actionRefreshStats);
@@ -78,13 +74,13 @@ MainWindow::MainWindow(QWidget * parent):
 #endif
 
   // Get the settings before connecting to any signals.
-  const QString folder = m_settings.value(ms_folderEntry, defaultFolder).toString();
-  if (folder.isEmpty())
+  const QString logFolder = m_settings.value(ms_folderEntry, defaultFolder).toString();
+  if (logFolder.isEmpty())
     m_statusLabel->setText(tr("Chat log folder not set."));
   else
   {
-    m_logDir.setPath(folder);
-    this->_refreshAvatars(folder);
+    m_dao = AvatarDao(logFolder);
+    this->_refreshAvatars(logFolder);
 
     const QString avatarName = m_settings.value(ms_avatarEntry).toString();
     if (!avatarName.isEmpty())
@@ -154,7 +150,7 @@ MainWindow::MainWindow(QWidget * parent):
   // Connect the reset action.
   QObject::connect(m_ui->actionResetView, &QAction::triggered, this, [this](bool)
   {
-    this->_refreshAvatars(m_logDir.path());
+    this->_refreshAvatars(m_dao.path());
   });
 
   // Connect the refresh action.
@@ -232,73 +228,37 @@ void MainWindow::_updateSortSettings(int column, int order)
   }
 }
 
-void MainWindow::_refreshAvatars(const QString & folder)
+void MainWindow::_refreshAvatars(const QString & logFolder)
 {
-  if (m_logDir.path() != folder)
+  if (m_dao.path() != logFolder)
   {
-    m_settings.setValue(ms_folderEntry, folder);
-    m_logDir.setPath(folder);
+    m_settings.setValue(ms_folderEntry, logFolder);
+    m_dao = AvatarDao(logFolder);
   }
 
   // Clear out the avatar names.
   m_ui->comboBox->clear();
 
-  // Get a list of the log files ("\?" is used here to avoid warnings about trigraphs).
-  auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_*_???\?-?\?-??.txt")});
-  if (fileInfoList.isEmpty())
-  {
-    m_statusLabel->setText(tr("No log files found."));
-    return;
-  }
+  auto avatars = m_dao.getAvatars();
+  avatars.sort();
 
-  static const QString startText = QStringLiteral("SotAChatLog_");
-  QSet<QString> nameSet;
-
-  // Extract the avatar names.
-  for (const auto &fileInfo: fileInfoList)
-  {
-    QString name = fileInfo.baseName();
-    int pos = name.lastIndexOf(QChar('_'));
-    if (pos <= startText.length())
-      continue;
-
-    name = name.mid(startText.length(), pos - startText.length());
-    if (name.isEmpty())
-      continue;
-
-    // Replace underscores with spaces and add the name to the set.
-    nameSet.insert(name.replace(QChar('_'), QChar(' ')));
-  }
-
-  if (nameSet.empty())
-  {
-    m_statusLabel->setText(tr("No avatars found."));
-    return;
-  }
-
-  // Sort the names.
-  QStringList nameList;
-  for (const auto &name: nameSet)
-    nameList.append(name);
-  nameList.sort();
-
-  // Add the names to the combo box.
-  m_ui->comboBox->addItems(nameList);
+  // Add the avatar names to the combo box.
+  m_ui->comboBox->addItems(avatars);
   m_ui->comboBox->setCurrentIndex(-1);
 }
 
-void MainWindow::_refreshStats(const QString & avatarName, const QString & filter)
+void MainWindow::_refreshStats(const QString & avatar, const QString & filter)
 {
-  if (m_avatar != avatarName)
+  if (m_avatar != avatar)
   {
-    m_settings.setValue(ms_avatarEntry, avatarName);
-    m_avatar = avatarName;
+    m_settings.setValue(ms_avatarEntry, avatar);
+    m_avatar = avatar;
   }
 
   // Clear out the stats.
   m_ui->treeWidget->clear();
 
-  if (avatarName.isEmpty())
+  if (avatar.isEmpty())
   {
     m_statusLabel->clear();
     m_ui->notesButton->setEnabled(false);
@@ -307,114 +267,88 @@ void MainWindow::_refreshStats(const QString & avatarName, const QString & filte
 
   m_ui->notesButton->setEnabled(true);
 
-  // Get a list of log files that match the avatar's name ("\?" is used here to avoid warnings about trigraphs).
-  const auto fileInfoList = m_logDir.entryInfoList({QStringLiteral("SotAChatLog_%1_???\?-?\?-??.txt").arg(QString(avatarName).replace(QChar(' '), QChar('_')))});
-  if (fileInfoList.isEmpty())
+  // Get a list of dates that "/stats" was used.
+  auto dateList = m_dao.getStatDates(avatar);
+  if (dateList.isEmpty())
   {
-    m_statusLabel->setText(tr("No log files found for %1.").arg(avatarName));
+    m_statusLabel->setText(tr("No log files found for %1.").arg(avatar));
     return;
   }
 
-  for (auto &fileInfo: fileInfoList)
+  // Sort the list so that the latest stats are first.
+  qSort(dateList.begin(), dateList.end(), [](const QString & s1, const QString & s2)
   {
-    // Attempt to open the log file.
-    QFile file(fileInfo.filePath());
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-      continue;
+    return s2 < s1;
+  });
 
-    QByteArray stats;
-    QString dateTime;
-
-    // Search for the last "/stats" entry.
-    while (!file.atEnd())
-    {
-      const QByteArray line = file.readLine();
-      int pos = line.indexOf("AdventurerLevel:");
-      if (pos > 0)
-      {
-        // In case AdventurerLevel is not the first item....
-        pos = line.indexOf("] ");
-        if (!(pos > 0))
-          continue;
-
-        stats = line.mid(pos + 2);
-        dateTime = line.mid(1, pos - 1);
-      }
-    }
-
-    if (stats.isEmpty())
-      continue;
-
-    // Split the text at spaces.
-    auto fields = stats.split(' ');
-
-    // Create a collection of text/value pair items.
-    QMap<int, QList<QTreeWidgetItem*>> items;
-    while (fields.size() >= 2)
-    {
-      static const QHash<QString, int> order = {
-        {QStringLiteral("AdventurerLevel:"), 0},
-        {QStringLiteral("ProducerLevel:"), 1},
-        {QStringLiteral("VirtueCourage:"), -1},
-        {QStringLiteral("VirtueLove:"), -1},
-        {QStringLiteral("VirtueTruth:"), -1}
-      };
-
-      const QString text = fields.takeFirst();
-      const QString value = fields.takeFirst();
-
-      bool searched = false;
-      if (!filter.isEmpty())
-      {
-        searched = text.contains(filter, Qt::CaseInsensitive);
-        if (!searched)
-          continue;
-      }
-
-      QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem({text, value}));
-      auto iter = order.find(text);
-
-      if (iter != order.end())
-      {
-        switch (iter.value())
-        {
-          case 0:
-            item->setForeground(0, m_itemBrushes.heavy());
-            item->setForeground(1, m_itemBrushes.heavy());
-            break;
-
-          case 1:
-            item->setForeground(0, m_itemBrushes.medium());
-            item->setForeground(1, m_itemBrushes.medium());
-            break;
-
-          default:
-            item->setForeground(0, m_itemBrushes.light());
-            item->setForeground(1, m_itemBrushes.light());
-            break;
-        }
-
-        // Don't show items with negative priority (unless they're explicitly searched for).
-        if ((iter.value() >= 0) || searched)
-          items[iter.value()].append(item.take());
-      }
-      else
-      {
-        item->setForeground(0, m_itemBrushes.light());
-        item->setForeground(1, m_itemBrushes.light());
-
-        // Fields not specifically in the ordering collection are put at the end.
-        items[std::numeric_limits<int>::max()].append(item.take());
-      }
-    }
-
-    // Add the items to the tree.
-    for (auto iter = items.begin(); iter != items.end(); ++iter)
-      m_ui->treeWidget->addTopLevelItems(iter.value());
-
-    m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatarName, dateTime));
+  // Get the stats for the most recent date.
+  auto stats = m_dao.getStats(avatar, dateList.at(0));
+  if (stats.isEmpty())
+  {
+    m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatar));
     return;
   }
 
-  m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatarName));
+  QMap<int, QList<QTreeWidgetItem*>> items;
+  for (const auto & stat: stats)
+  {
+    static const QHash<QString, int> order = {
+      {QStringLiteral("AdventurerLevel:"), 0},
+      {QStringLiteral("ProducerLevel:"), 1},
+      {QStringLiteral("VirtueCourage:"), -1},
+      {QStringLiteral("VirtueLove:"), -1},
+      {QStringLiteral("VirtueTruth:"), -1}
+    };
+
+    bool searched = false;
+    if (!filter.isEmpty())
+    {
+      searched = stat.name().contains(filter, Qt::CaseInsensitive);
+      if (!searched)
+        continue;
+    }
+
+    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem({stat.name(), stat.value()}));
+    auto iter = order.find(stat.name());
+
+    if (iter != order.end())
+    {
+      switch (iter.value())
+      {
+        case 0:
+          item->setForeground(0, m_itemBrushes.heavy());
+          item->setForeground(1, m_itemBrushes.heavy());
+          break;
+
+        case 1:
+          item->setForeground(0, m_itemBrushes.medium());
+          item->setForeground(1, m_itemBrushes.medium());
+          break;
+
+        default:
+          item->setForeground(0, m_itemBrushes.light());
+          item->setForeground(1, m_itemBrushes.light());
+          break;
+      }
+
+      // Don't show items with negative priority (unless they're explicitly searched for).
+      if ((iter.value() >= 0) || searched)
+        items[iter.value()].append(item.take());
+    }
+    else
+    {
+      item->setForeground(0, m_itemBrushes.light());
+      item->setForeground(1, m_itemBrushes.light());
+
+      // Fields not specifically in the ordering collection are put at the end.
+      items[std::numeric_limits<int>::max()].append(item.take());
+    }
+  }
+
+  // Add the items to the tree.
+  for (auto iter = items.begin(); iter != items.end(); ++iter)
+    m_ui->treeWidget->addTopLevelItems(iter.value());
+
+  m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatar, dateList.at(0)));
+  return;
 }

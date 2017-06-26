@@ -5,6 +5,8 @@
 #include <QMainWindow>
 #include <QSettings>
 
+#include "AvatarDao.h"
+
 class QLabel;
 
 namespace Ui
@@ -48,7 +50,8 @@ class MainWindow: public QMainWindow
   ItemBrushes m_itemBrushes;
   QSettings m_settings;
   QString m_avatar;
-  QDir m_logDir;
+
+  AvatarDao m_dao;
 
   QMetaObject::Connection m_sortIndicatorConnection;
   int m_sortColumn{0};
@@ -60,8 +63,8 @@ public:
 
 private:
   void _updateSortSettings(int column, int order);
-  void _refreshAvatars(const QString & folder);
-  void _refreshStats(const QString & avatarName, const QString & filter = {});
+  void _refreshAvatars(const QString & logFolder);
+  void _refreshStats(const QString & avatar, const QString & filter = {});
 };
 
 #endif // MAINWINDOW_H

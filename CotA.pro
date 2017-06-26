@@ -13,10 +13,12 @@ TARGET = CotA
 TEMPLATE = app
 
 SOURCES += main.cpp \
+    AvatarDao.cpp \
     MainWindow.cpp \
     NotesDialog.cpp
 
 HEADERS += \
+    AvatarDao.h \
     MainWindow.h \
     NotesDialog.h
 
