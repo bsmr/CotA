@@ -1,10 +1,4 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2016-09-21T09:44:06
-#
-#-------------------------------------------------
-
-VERSION = 1.1.0
+VERSION = 1.2.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 QT += core gui widgets
