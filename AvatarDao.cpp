@@ -1,20 +1,31 @@
 #include "AvatarDao.h"
 
-bool AvatarDao::_preParse(const QByteArray & line, QByteArray & date, QByteArray & stats)
+// -----{ AvatarDao }----- //
+
+const QByteArray AvatarDao::ms_adventurerLevel = "AdventurerLevel:";
+
+QByteArray AvatarDao::_getDate(const QByteArray & line, const QByteArray & search)
 {
-  int pos = line.indexOf("AdventurerLevel:");
-  if (pos > 0)
+  if (line.startsWith('['))
   {
-    pos = line.indexOf("] ");
-    if (pos > 0)
+    int searchPos = (search.isEmpty()? line.length(): line.indexOf(search));
+    if (searchPos > 0)
     {
-      date = line.mid(1, pos - 1);
-      stats = line.mid(pos + 2);
-      return true;
+      int bracketPos = line.indexOf("] ");
+      if ((bracketPos > 1) && (bracketPos < searchPos))
+        return line.mid(1, bracketPos - 1);
     }
   }
 
-  return false;
+  return {};
+}
+
+QByteArray AvatarDao::_getText(const QByteArray & line, const QByteArray & date, const QByteArray & search)
+{
+  if (line.startsWith("[" + date + "] ") && (search.isEmpty() || line.contains(search)))
+    return line.mid(date.length() + 3);
+
+  return {};
 }
 
 QFileInfoList AvatarDao::_getFileinfoList(const QString & avatar) const
@@ -62,7 +73,6 @@ QStringList AvatarDao::getAvatars() const
   static const QString startText = QStringLiteral("SotAChatLog_");
   QSet<QString> nameSet;
 
-  // Extract the avatar names.
   for (const auto & fileInfo: fileInfoList)
   {
     QString name = fileInfo.baseName();
@@ -70,6 +80,7 @@ QStringList AvatarDao::getAvatars() const
     if (pos <= startText.length())
       continue;
 
+    // Extract the avatar name.
     name = name.mid(startText.length(), pos - startText.length());
     if (name.isEmpty())
       continue;
@@ -106,9 +117,8 @@ QStringList AvatarDao::getStatDates(const QString & avatar) const
     // Search for the "/stats" entries.
     while (!file.atEnd())
     {
-      QByteArray date;
-      QByteArray stats;
-      if (_preParse(file.readLine(), date, stats))
+      QByteArray date = _getDate(file.readLine(), ms_adventurerLevel);
+      if (!date.isEmpty())
          dates.append(date);
     }
   }
@@ -116,13 +126,13 @@ QStringList AvatarDao::getStatDates(const QString & avatar) const
   return dates;
 }
 
-QList<AvatarDao::StatEntry> AvatarDao::getStats(const QString & avatar, const QString & date) const
+QList<AvatarDao::StatItem> AvatarDao::getStats(const QString & avatar, const QString & date) const
 {
-  // Get a list of log files that match the avatar's name ("\?" is used here to avoid warnings about trigraphs).
   auto fileInfoList = _getFileinfoList(avatar);
   if (fileInfoList.isEmpty())
     return {};
 
+  const QByteArray dateCheck = date.toUtf8();
   for (auto &fileInfo: fileInfoList)
   {
     // Attempt to open the log file.
@@ -130,19 +140,13 @@ QList<AvatarDao::StatEntry> AvatarDao::getStats(const QString & avatar, const QS
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
       continue;
 
-    QByteArray checkDate = date.toUtf8();
-    QByteArray stats;
-
     // Search for the "/stats" entry that matches dateTime.
+    QByteArray stats;
     while (!file.atEnd())
     {
-      QByteArray parsedStats;
-      QByteArray parsedDate;
-      if (_preParse(file.readLine(), parsedDate, parsedStats) && (parsedDate == checkDate))
-      {
-        stats = parsedStats;
+      stats = _getText(file.readLine(), dateCheck, ms_adventurerLevel);
+      if (!stats.isEmpty())
         break;
-      }
     }
 
     if (stats.isEmpty())
@@ -152,12 +156,12 @@ QList<AvatarDao::StatEntry> AvatarDao::getStats(const QString & avatar, const QS
     auto fields = stats.split(' ');
 
     // Create a collection of StatEntry items.
-    QList<StatEntry> items;
+    QList<StatItem> items;
     while (fields.size() >= 2)
     {
       const QString name = fields.takeFirst();
-      const QString value = fields.takeFirst();
-      items.append(StatEntry(name, value));
+      if (name.endsWith(':'))
+        items.append(StatItem(name.left(name.length() - 1), fields.takeFirst()));
     }
 
     return items;
@@ -166,33 +170,35 @@ QList<AvatarDao::StatEntry> AvatarDao::getStats(const QString & avatar, const QS
   return {};
 }
 
-AvatarDao::StatEntry::StatEntry()
+// -----{ AvatarDao::StatItem }----- //
+
+AvatarDao::StatItem::StatItem()
 {
 }
 
-AvatarDao::StatEntry::StatEntry(const QString & name, const QString & value):
+AvatarDao::StatItem::StatItem(const QString & name, const QString & value):
   m_name(name),
   m_value(value)
 {
 }
 
-AvatarDao::StatEntry::StatEntry(const AvatarDao::StatEntry & other):
+AvatarDao::StatItem::StatItem(const AvatarDao::StatItem & other):
   m_name(other.m_name),
   m_value(other.m_value)
 {
 }
 
-AvatarDao::StatEntry & AvatarDao::StatEntry::operator =(const AvatarDao::StatEntry & other)
+AvatarDao::StatItem & AvatarDao::StatItem::operator =(const AvatarDao::StatItem & other)
 {
-  return *new (this) StatEntry(other);
+  return *new (this) StatItem(other);
 }
 
-const QString & AvatarDao::StatEntry::name() const
+const QString & AvatarDao::StatItem::name() const
 {
   return m_name;
 }
 
-const QString &AvatarDao::StatEntry::value() const
+const QString &AvatarDao::StatItem::value() const
 {
   return m_value;
 }
