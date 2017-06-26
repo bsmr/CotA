@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>412</width>
-    <height>504</height>
+    <width>336</width>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,12 +53,19 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="avatarComboBox">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="dateComboBox">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
         </property>
        </widget>
       </item>
@@ -116,7 +126,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>412</width>
+     <width>336</width>
      <height>25</height>
     </rect>
    </property>

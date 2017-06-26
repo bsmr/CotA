@@ -11,7 +11,7 @@
 
 MainWindow::ItemBrushes::ItemBrushes()
 {
-  this->reset();
+  reset();
 }
 
 const QBrush & MainWindow::ItemBrushes::heavy() const
@@ -47,172 +47,6 @@ const QString MainWindow::ms_enableSortEntry(QStringLiteral("enableSort"));
 const QString MainWindow::ms_sortColumnEntry(QStringLiteral("sortColumn"));
 const QString MainWindow::ms_sortOrderEntry(QStringLiteral("sortOrder"));
 
-MainWindow::MainWindow(QWidget * parent):
-  QMainWindow(parent),
-  m_ui(new Ui::MainWindow),
-  m_statusLabel{new QLabel},
-  m_settings(QStringLiteral("Barugon"), QStringLiteral("Companion of the Avatar"))
-{
-  m_ui->setupUi(this);
-  m_ui->statusBar->addWidget(m_statusLabel);
-
-  // Set the tree-view header so that it will resize to the contents.
-  m_ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-  m_ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-
-  // Add these actions to the main window so that the shortcut keys work.
-  this->addAction(m_ui->actionQuit);
-  this->addAction(m_ui->actionRefreshStats);
-  this->addAction(m_ui->actionFilter);
-
-#if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
-  const QString defaultFolder = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
-#elif defined(Q_OS_WIN32)
-  const QString defaultFolder = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
-#else
-  const QString defaultFolder;
-#endif
-
-  // Get the settings before connecting to any signals.
-  const QString logFolder = m_settings.value(ms_folderEntry, defaultFolder).toString();
-  if (logFolder.isEmpty())
-    m_statusLabel->setText(tr("Chat log folder not set."));
-  else
-  {
-    m_dao = AvatarDao(logFolder);
-    this->_refreshAvatars(logFolder);
-
-    const QString avatarName = m_settings.value(ms_avatarEntry).toString();
-    if (!avatarName.isEmpty())
-    {
-      m_ui->comboBox->setCurrentText(avatarName);
-      if (m_ui->comboBox->currentText() == avatarName)
-      {
-        m_avatar = avatarName;
-        this->_refreshStats(m_ui->comboBox->currentText());
-      }
-    }
-  }
-
-  m_sortColumn = m_settings.value(ms_sortColumnEntry).toInt();
-  m_sortOrder = m_settings.value(ms_sortOrderEntry).toInt();
-  if (m_settings.value(ms_enableSortEntry).toBool())
-  {
-    m_ui->actionEnableSort->setChecked(true);
-    m_ui->treeWidget->setSortingEnabled(true);
-    m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
-    m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, this, [this](int column, Qt::SortOrder order)
-    {
-      this->_updateSortSettings(column, int(order));
-    });
-  }
-
-  // Connect the quit action.
-  QObject::connect(m_ui->actionQuit, &QAction::triggered, this, [this](bool)
-  {
-    this->close();
-  });
-
-  // Connect the changed signal of the avatar name combo-box.
-  QObject::connect(m_ui->comboBox, &QComboBox::currentTextChanged, this, [this](const QString &text)
-  {
-    this->_refreshStats(text);
-  });
-
-  // Connect the select folder action.
-  QObject::connect(m_ui->actionSelectFolder, &QAction::triggered, this, [this](bool)
-  {
-    QFileDialog folderSelect(this, tr("Select Log Folder"));
-    folderSelect.setFileMode(QFileDialog::Directory);
-    folderSelect.setOption(QFileDialog::ShowDirsOnly, true);
-    folderSelect.setFilter(QDir::Dirs | QDir::Hidden | QDir::NoDotAndDotDot);
-    folderSelect.setDirectory(QDir::homePath());
-    if (folderSelect.exec())
-    {
-      QStringList folders = folderSelect.selectedFiles();
-      if (!folders.isEmpty())
-        this->_refreshAvatars(folders.takeFirst());
-    }
-  });
-
-  // Connect the note button signal.
-  QObject::connect(m_ui->notesButton, &QAbstractButton::clicked, this, [this](bool)
-  {
-    auto avatar = m_ui->comboBox->currentText();
-    if (avatar.isEmpty())
-      return;
-
-    NotesDialog notesDialog(this, tr("Notes for %1").arg(avatar), m_settings.value(avatar).toString());
-    if (notesDialog.exec() == QDialog::Accepted)
-      m_settings.setValue(avatar, notesDialog.text());
-  });
-
-  // Connect the reset action.
-  QObject::connect(m_ui->actionResetView, &QAction::triggered, this, [this](bool)
-  {
-    this->_refreshAvatars(m_dao.path());
-  });
-
-  // Connect the refresh action.
-  QObject::connect(m_ui->actionRefreshStats, &QAction::triggered, this, [this](bool)
-  {
-    this->_refreshStats(m_ui->comboBox->currentText());
-  });
-
-  // Connect the enable sort action.
-  QObject::connect(m_ui->actionEnableSort, &QAction::triggered, this, [this](bool checked)
-  {
-    // Disconnect the previous header indicator connection to prevent it from being called when sorting is enabled.
-    if (m_sortIndicatorConnection)
-      QObject::disconnect(m_sortIndicatorConnection);
-
-    m_settings.setValue(ms_enableSortEntry, checked);
-    m_ui->treeWidget->setSortingEnabled(checked);
-    if (checked)
-    {
-      // Sort the items.
-      m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
-
-      // Connect the header indicator signal.
-      m_sortIndicatorConnection = QObject::connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, this, [this](int column, Qt::SortOrder order)
-      {
-        this->_updateSortSettings(column, int(order));
-      });
-    }
-    else
-    {
-      // Refresh the stats to get back to the default, unsorted view.
-      this->_refreshStats(m_ui->comboBox->currentText());
-    }
-  });
-
-  // Connect the filter action.
-  QObject::connect(m_ui->actionFilter, &QAction::triggered, this, [this](bool)
-  {
-    QString filter = QInputDialog::getText(this, tr("Filter Stats"), tr("Text:"));
-    if (!filter.isEmpty())
-      this->_refreshStats(m_ui->comboBox->currentText(), filter);
-  });
-
-  // Connect the about action.
-  QObject::connect(m_ui->actionAbout, &QAction::triggered, this, [this](bool)
-  {
-    auto message = tr("%1 version %2\nWritten and maintained by Barugon").arg(QApplication::applicationName(), QApplication::applicationVersion());
-    QMessageBox::about(this, tr("About %1").arg(this->windowTitle()), message);
-  });
-
-  // Connect to the applications palette changed signal to detect theme changes.
-  QObject::connect(static_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::paletteChanged, this, [this](const QPalette&)
-  {
-    m_itemBrushes.reset();
-    this->_refreshStats(m_ui->comboBox->currentText());
-  });
-}
-
-MainWindow::~MainWindow()
-{
-}
-
 void MainWindow::_updateSortSettings(int column, int order)
 {
   if (m_sortColumn != column)
@@ -232,31 +66,33 @@ void MainWindow::_refreshAvatars(const QString & logFolder)
 {
   if (m_dao.path() != logFolder)
   {
+    // Update the settings.
     m_settings.setValue(ms_folderEntry, logFolder);
     m_dao = AvatarDao(logFolder);
   }
 
   // Clear out the avatar names.
-  m_ui->comboBox->clear();
+  m_ui->avatarComboBox->clear();
 
   auto avatars = m_dao.getAvatars();
   avatars.sort();
 
   // Add the avatar names to the combo box.
-  m_ui->comboBox->addItems(avatars);
-  m_ui->comboBox->setCurrentIndex(-1);
+  m_ui->avatarComboBox->addItems(avatars);
+  m_ui->avatarComboBox->setCurrentIndex(-1);
 }
 
-void MainWindow::_refreshStats(const QString & avatar, const QString & filter)
+void MainWindow::_refreshDates(const QString & avatar)
 {
   if (m_avatar != avatar)
   {
+    // Update the settings.
     m_settings.setValue(ms_avatarEntry, avatar);
     m_avatar = avatar;
   }
 
-  // Clear out the stats.
-  m_ui->treeWidget->clear();
+  // Clear out the dates.
+  m_ui->dateComboBox->clear();
 
   if (avatar.isEmpty())
   {
@@ -267,25 +103,37 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & filter)
 
   m_ui->notesButton->setEnabled(true);
 
-  // Get a list of dates that "/stats" was used.
-  auto dateList = m_dao.getStatDates(avatar);
-  if (dateList.isEmpty())
+  // Get a list of dates where "/stats" was used.
+  auto dates = m_dao.getStatDates(avatar);
+  if (dates.isEmpty())
   {
-    m_statusLabel->setText(tr("No log files found for %1.").arg(avatar));
+    m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatar));
     return;
   }
 
-  // Sort the list so that the latest stats are first.
-  qSort(dateList.begin(), dateList.end(), [](const QString & s1, const QString & s2)
+  // Sort the list so that the most recent stats are first.
+  qSort(dates.begin(), dates.end(), [](const QString & s1, const QString & s2)
   {
     return s2 < s1;
   });
 
-  // Get the stats for the most recent date.
-  auto stats = m_dao.getStats(avatar, dateList.at(0));
+  m_ui->dateComboBox->addItems(dates);
+  m_ui->dateComboBox->setCurrentIndex(0);
+}
+
+void MainWindow::_refreshStats(const QString & avatar, const QString & date, const QString & filter)
+{
+  // Clear out the stats.
+  m_ui->treeWidget->clear();
+
+  if (avatar.isEmpty() || date.isEmpty())
+    return;
+
+  // Get the stats.
+  auto stats = m_dao.getStats(avatar, date);
   if (stats.isEmpty())
   {
-    m_statusLabel->setText(tr("No \"/stats\" found for %1.").arg(avatar));
+    m_statusLabel->setText(tr("No \"/stats\" found for %1 on %2 (weird!).").arg(avatar).arg(date));
     return;
   }
 
@@ -293,11 +141,11 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & filter)
   for (const auto & stat: stats)
   {
     static const QHash<QString, int> order = {
-      {QStringLiteral("AdventurerLevel:"), 0},
-      {QStringLiteral("ProducerLevel:"), 1},
-      {QStringLiteral("VirtueCourage:"), -1},
-      {QStringLiteral("VirtueLove:"), -1},
-      {QStringLiteral("VirtueTruth:"), -1}
+      {QStringLiteral("AdventurerLevel"), 0},
+      {QStringLiteral("ProducerLevel"), 1},
+      {QStringLiteral("VirtueCourage"), -1},
+      {QStringLiteral("VirtueLove"), -1},
+      {QStringLiteral("VirtueTruth"), -1}
     };
 
     bool searched = false;
@@ -308,7 +156,7 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & filter)
         continue;
     }
 
-    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem({stat.name(), stat.value()}));
+    QScopedPointer<QTreeWidgetItem> item(new QTreeWidgetItem({stat.name() + ' ', stat.value()}));
     auto iter = order.find(stat.name());
 
     if (iter != order.end())
@@ -349,6 +197,179 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & filter)
   for (auto iter = items.begin(); iter != items.end(); ++iter)
     m_ui->treeWidget->addTopLevelItems(iter.value());
 
-  m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatar, dateList.at(0)));
+  m_statusLabel->setText(tr("Showing stats for %1 from %2.").arg(avatar, date));
   return;
+}
+
+MainWindow::MainWindow(QWidget * parent):
+  QMainWindow(parent),
+  m_ui(new Ui::MainWindow),
+  m_statusLabel{new QLabel},
+  m_settings(QStringLiteral("Barugon"), QStringLiteral("Companion of the Avatar"))
+{
+  m_ui->setupUi(this);
+  m_ui->statusBar->addWidget(m_statusLabel);
+
+  // Set the tree-view header so that it will resize to the contents.
+  m_ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+  m_ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+
+  // Add these actions to the main window so that the shortcut keys work.
+  addAction(m_ui->actionQuit);
+  addAction(m_ui->actionRefreshStats);
+  addAction(m_ui->actionFilter);
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
+  const QString defaultFolder = QDir::homePath() + QStringLiteral("/.config/Portalarium/Shroud of the Avatar/ChatLogs");
+#elif defined(Q_OS_WIN32)
+  const QString defaultFolder = QDir::homePath() + QStringLiteral("/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs");
+#else
+  const QString defaultFolder;
+#endif
+
+  // Get the settings before connecting to any signals.
+  const QString logFolder = m_settings.value(ms_folderEntry, defaultFolder).toString();
+  if (logFolder.isEmpty())
+    m_statusLabel->setText(tr("Chat log folder not set."));
+  else
+  {
+    m_dao = AvatarDao(logFolder);
+    _refreshAvatars(logFolder);
+
+    const QString avatarName = m_settings.value(ms_avatarEntry).toString();
+    if (!avatarName.isEmpty())
+    {
+      m_ui->avatarComboBox->setCurrentText(avatarName);
+      if (m_ui->avatarComboBox->currentText() == avatarName)
+      {
+        m_avatar = avatarName;
+        _refreshDates(m_ui->avatarComboBox->currentText());
+        _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
+      }
+    }
+  }
+
+  m_sortColumn = m_settings.value(ms_sortColumnEntry).toInt();
+  m_sortOrder = m_settings.value(ms_sortOrderEntry).toInt();
+  if (m_settings.value(ms_enableSortEntry).toBool())
+  {
+    m_ui->actionEnableSort->setChecked(true);
+    m_ui->treeWidget->setSortingEnabled(true);
+    m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
+    m_sortIndicatorConnection = connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, this, [this](int column, Qt::SortOrder order)
+    {
+      _updateSortSettings(column, int(order));
+    });
+  }
+
+  // Connect the quit action.
+  connect(m_ui->actionQuit, &QAction::triggered, this, [this](bool)
+  {
+    close();
+  });
+
+  // Connect the changed signal of the avatar name combo-box.
+  connect(m_ui->avatarComboBox, &QComboBox::currentTextChanged, this, [this](const QString &text)
+  {
+    _refreshDates(text);
+  });
+
+  // Connect the changed signal of the date combo-box.
+  connect(m_ui->dateComboBox, &QComboBox::currentTextChanged, this, [this](const QString &text)
+  {
+    _refreshStats(m_ui->avatarComboBox->currentText(), text);
+  });
+
+  // Connect the select folder action.
+  connect(m_ui->actionSelectFolder, &QAction::triggered, this, [this](bool)
+  {
+    QFileDialog folderSelect(this, tr("Select Log Folder"));
+    folderSelect.setFileMode(QFileDialog::Directory);
+    folderSelect.setOption(QFileDialog::ShowDirsOnly, true);
+    folderSelect.setFilter(QDir::Dirs | QDir::Hidden | QDir::NoDotAndDotDot);
+    folderSelect.setDirectory(QDir::homePath());
+    if (folderSelect.exec())
+    {
+      QStringList folders = folderSelect.selectedFiles();
+      if (!folders.isEmpty())
+        _refreshAvatars(folders.takeFirst());
+    }
+  });
+
+  // Connect the note button signal.
+  connect(m_ui->notesButton, &QAbstractButton::clicked, this, [this](bool)
+  {
+    auto avatar = m_ui->avatarComboBox->currentText();
+    if (avatar.isEmpty())
+      return;
+
+    NotesDialog notesDialog(this, tr("Notes for %1").arg(avatar), m_settings.value(avatar).toString());
+    if (notesDialog.exec() == QDialog::Accepted)
+      m_settings.setValue(avatar, notesDialog.text());
+  });
+
+  // Connect the reset action.
+  connect(m_ui->actionResetView, &QAction::triggered, this, [this](bool)
+  {
+    _refreshAvatars(m_dao.path());
+  });
+
+  // Connect the refresh action.
+  connect(m_ui->actionRefreshStats, &QAction::triggered, this, [this](bool)
+  {
+    _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
+  });
+
+  // Connect the enable sort action.
+  connect(m_ui->actionEnableSort, &QAction::triggered, this, [this](bool checked)
+  {
+    // Disconnect the previous header indicator connection to prevent it from being called when sorting is enabled.
+    if (m_sortIndicatorConnection)
+      disconnect(m_sortIndicatorConnection);
+
+    m_settings.setValue(ms_enableSortEntry, checked);
+    m_ui->treeWidget->setSortingEnabled(checked);
+    if (checked)
+    {
+      // Sort the items.
+      m_ui->treeWidget->sortItems(m_sortColumn, Qt::SortOrder(m_sortOrder));
+
+      // Connect the header indicator signal.
+      m_sortIndicatorConnection = connect(m_ui->treeWidget->header(), &QHeaderView::sortIndicatorChanged, this, [this](int column, Qt::SortOrder order)
+      {
+        _updateSortSettings(column, int(order));
+      });
+    }
+    else
+    {
+      // Refresh the stats to get back to the default, unsorted view.
+      _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
+    }
+  });
+
+  // Connect the filter action.
+  connect(m_ui->actionFilter, &QAction::triggered, this, [this](bool)
+  {
+    QString filter = QInputDialog::getText(this, tr("Filter Stats"), tr("Text:"));
+    if (!filter.isEmpty())
+      _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText(), filter);
+  });
+
+  // Connect the about action.
+  connect(m_ui->actionAbout, &QAction::triggered, this, [this](bool)
+  {
+    auto message = tr("%1 version %2\nWritten and maintained by Barugon").arg(QApplication::applicationName(), QApplication::applicationVersion());
+    QMessageBox::about(this, tr("About %1").arg(windowTitle()), message);
+  });
+
+  // Connect to the applications palette changed signal to detect theme changes.
+  connect(static_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::paletteChanged, this, [this](const QPalette&)
+  {
+    m_itemBrushes.reset();
+    _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
+  });
+}
+
+MainWindow::~MainWindow()
+{
 }

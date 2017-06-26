@@ -48,6 +48,7 @@ class MainWindow: public QMainWindow
   QLabel * m_statusLabel{nullptr};
 
   ItemBrushes m_itemBrushes;
+
   QSettings m_settings;
   QString m_avatar;
 
@@ -57,14 +58,14 @@ class MainWindow: public QMainWindow
   int m_sortColumn{0};
   int m_sortOrder{0};
 
+  void _updateSortSettings(int column, int order);
+  void _refreshAvatars(const QString & logFolder);
+  void _refreshDates(const QString & avatar);
+  void _refreshStats(const QString & avatar, const QString & date, const QString & filter = {});
+
 public:
   explicit MainWindow(QWidget * parent = nullptr);
   ~MainWindow();
-
-private:
-  void _updateSortSettings(int column, int order);
-  void _refreshAvatars(const QString & logFolder);
-  void _refreshStats(const QString & avatar, const QString & filter = {});
 };
 
 #endif // MAINWINDOW_H
