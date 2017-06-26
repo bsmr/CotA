@@ -133,7 +133,7 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & date, con
   auto stats = m_dao.getStats(avatar, date);
   if (stats.isEmpty())
   {
-    m_statusLabel->setText(tr("No \"/stats\" found for %1 on %2 (weird!).").arg(avatar).arg(date));
+    m_statusLabel->setText(tr("No \"/stats\" found for %1 on %2... weird!").arg(avatar).arg(date));
     return;
   }
 
