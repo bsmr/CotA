@@ -2,8 +2,6 @@
 #define AVATARDAO_H
 
 #include <QDir>
-#include <QList>
-#include <QString>
 #include <QStringList>
 
 class AvatarDao

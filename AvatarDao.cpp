@@ -1,8 +1,10 @@
 #include "AvatarDao.h"
 
+#include <QSet>
+
 // -----{ AvatarDao }----- //
 
-const QByteArray AvatarDao::ms_adventurerLevel = "AdventurerLevel:";
+const QByteArray AvatarDao::ms_adventurerLevel("AdventurerLevel:");
 
 QByteArray AvatarDao::_getDate(const QByteArray & line, const QByteArray & search)
 {
@@ -54,7 +56,7 @@ AvatarDao::AvatarDao(const AvatarDao & other):
 {
 }
 
-AvatarDao &AvatarDao::operator =(const AvatarDao & other)
+AvatarDao & AvatarDao::operator =(const AvatarDao & other)
 {
   return *new (this) AvatarDao(other);
 }
@@ -77,7 +79,7 @@ QStringList AvatarDao::getAvatars() const
   {
     QString name = fileInfo.baseName();
     int pos = name.lastIndexOf(QChar('_'));
-    if (pos <= startText.length())
+    if (!(pos > startText.length()))
       continue;
 
     // Extract the avatar name.
@@ -154,6 +156,7 @@ QList<AvatarDao::StatItem> AvatarDao::getStats(const QString & avatar, const QSt
 
     // Split the text at spaces.
     auto fields = stats.split(' ');
+    fields.removeAll({});
 
     // Create a collection of StatEntry items.
     QList<StatItem> items;
