@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QDir>
 #include <QMainWindow>
 #include <QSettings>
 
@@ -60,7 +59,7 @@ class MainWindow: public QMainWindow
 
   void _updateSortSettings(int column, int order);
   void _refreshAvatars(const QString & logFolder);
-  void _refreshDates(const QString & avatar);
+  void _refreshDates(const QString & avatar, const QString & date = {});
   void _refreshStats(const QString & avatar, const QString & date, const QString & filter = {});
 
 public:

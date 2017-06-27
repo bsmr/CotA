@@ -4,7 +4,6 @@
 
 #include <QFileDialog>
 #include <QInputDialog>
-#include <QLabel>
 #include <QMessageBox>
 
 /* -----{ MainWindow::ItemBrushes }----- */
@@ -82,7 +81,7 @@ void MainWindow::_refreshAvatars(const QString & logFolder)
   m_ui->avatarComboBox->setCurrentIndex(-1);
 }
 
-void MainWindow::_refreshDates(const QString & avatar)
+void MainWindow::_refreshDates(const QString & avatar, const QString & date)
 {
   if (m_avatar != avatar)
   {
@@ -118,7 +117,14 @@ void MainWindow::_refreshDates(const QString & avatar)
   });
 
   m_ui->dateComboBox->addItems(dates);
-  m_ui->dateComboBox->setCurrentIndex(0);
+  if (date.isEmpty())
+    m_ui->dateComboBox->setCurrentIndex(0);
+  else
+  {
+    m_ui->dateComboBox->setCurrentText(date);
+    if (m_ui->dateComboBox->currentText() != date)
+      m_ui->dateComboBox->setCurrentIndex(0);
+  }
 }
 
 void MainWindow::_refreshStats(const QString & avatar, const QString & date, const QString & filter)
@@ -133,7 +139,7 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & date, con
   auto stats = m_dao.getStats(avatar, date);
   if (stats.isEmpty())
   {
-    m_statusLabel->setText(tr("No \"/stats\" found for %1 on %2... weird!").arg(avatar).arg(date));
+    m_statusLabel->setText(tr("No \"/stats\" found for %1 on %2... weird!").arg(avatar, date));
     return;
   }
 
@@ -317,7 +323,7 @@ MainWindow::MainWindow(QWidget * parent):
   // Connect the refresh action.
   connect(m_ui->actionRefreshStats, &QAction::triggered, this, [this](bool)
   {
-    _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
+    _refreshDates(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
   });
 
   // Connect the enable sort action.
