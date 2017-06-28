@@ -117,14 +117,12 @@ void MainWindow::_refreshDates(const QString & avatar, const QString & date)
   });
 
   m_ui->dateComboBox->addItems(dates);
-  if (date.isEmpty())
-    m_ui->dateComboBox->setCurrentIndex(0);
-  else
-  {
+
+  if (!date.isEmpty())
     m_ui->dateComboBox->setCurrentText(date);
-    if (m_ui->dateComboBox->currentText() != date)
-      m_ui->dateComboBox->setCurrentIndex(0);
-  }
+
+  if (m_ui->dateComboBox->currentIndex() < 0)
+    m_ui->dateComboBox->setCurrentIndex(0);
 }
 
 void MainWindow::_refreshStats(const QString & avatar, const QString & date, const QString & filter)
@@ -146,6 +144,7 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & date, con
   QMap<int, QList<QTreeWidgetItem*>> items;
   for (const auto & stat: stats)
   {
+    // A hash of prioritized items.
     static const QHash<QString, int> order = {
       {QStringLiteral("AdventurerLevel"), 0},
       {QStringLiteral("ProducerLevel"), 1},
@@ -167,6 +166,7 @@ void MainWindow::_refreshStats(const QString & avatar, const QString & date, con
 
     if (iter != order.end())
     {
+      // Colorize the prioritized items.
       switch (iter.value())
       {
         case 0:
