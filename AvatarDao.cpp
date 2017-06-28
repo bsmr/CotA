@@ -104,6 +104,9 @@ QStringList AvatarDao::getAvatars() const
 
 QStringList AvatarDao::getStatDates(const QString & avatar) const
 {
+  if (avatar.isEmpty())
+    return {};
+
   auto fileInfoList = _getFileinfoList(avatar);
   if (fileInfoList.isEmpty())
     return {};
@@ -130,6 +133,9 @@ QStringList AvatarDao::getStatDates(const QString & avatar) const
 
 QList<AvatarDao::StatItem> AvatarDao::getStats(const QString & avatar, const QString & date) const
 {
+  if (avatar.isEmpty() || date.isEmpty())
+    return {};
+
   auto fileInfoList = _getFileinfoList(avatar);
   if (fileInfoList.isEmpty())
     return {};
