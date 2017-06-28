@@ -242,16 +242,21 @@ MainWindow::MainWindow(QWidget * parent):
     m_dao = AvatarDao(logFolder);
     _refreshAvatars(logFolder);
 
-    const QString avatarName = m_settings.value(ms_avatarEntry).toString();
+    QString avatarName = m_settings.value(ms_avatarEntry).toString();
+    if (!avatarName.isEmpty())
+      m_ui->avatarComboBox->setCurrentText(avatarName);
+
+    if (m_ui->avatarComboBox->currentIndex() < 0)
+    {
+      m_ui->avatarComboBox->setCurrentIndex(0);
+      avatarName = m_ui->avatarComboBox->currentText();
+    }
+
     if (!avatarName.isEmpty())
     {
-      m_ui->avatarComboBox->setCurrentText(avatarName);
-      if (m_ui->avatarComboBox->currentText() == avatarName)
-      {
-        m_avatar = avatarName;
-        _refreshDates(m_ui->avatarComboBox->currentText());
-        _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
-      }
+      m_avatar = avatarName;
+      _refreshDates(m_ui->avatarComboBox->currentText());
+      _refreshStats(m_ui->avatarComboBox->currentText(), m_ui->dateComboBox->currentText());
     }
   }
 
