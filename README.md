@@ -12,7 +12,6 @@ The CotA executable can be found in a folder next to the project folder with a n
 On fedora, you may need to install the C++ compiler and libGL:
 ```
 sudo dnf install gcc-c++ mesa-libGL-devel
-
 ```
 
 This code is released as public domain. Do with it as you want but I am not liable for any of it.
