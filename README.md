@@ -9,5 +9,11 @@ Next, click the computer icon in the lower left with the word "Debug" below it a
 
 The CotA executable can be found in a folder next to the project folder with a name something like "build-CotA-Desktop_Qt_5_7_0_GCC_64bit-Release". You can move this executable wherever you like and double click to run it.
 
+On fedora, you may need to install the C++ compiler and libGL:
+```
+sudo dnf install gcc-c++ mesa-libGL-devel
+
+```
+
 This code is released as public domain. Do with it as you want but I am not liable for any of it.
 
