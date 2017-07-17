@@ -2,6 +2,7 @@
 #include "NotesDialog.h"
 #include "ui_MainWindow.h"
 
+#include <QDateTime>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -118,7 +119,8 @@ void MainWindow::_refreshDates(const QString & avatar, const QString & date)
   // Sort the list so that the most recent stats are first.
   qSort(dates.begin(), dates.end(), [](const QString & s1, const QString & s2)
   {
-    return s2 < s1;
+    static const QString format(QStringLiteral("m/d/y h:m:s"));
+    return QDateTime::fromString(s2, format) < QDateTime::fromString(s1, format);
   });
 
   m_ui->dateComboBox->addItems(dates);
