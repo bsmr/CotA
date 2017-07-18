@@ -119,7 +119,7 @@ void MainWindow::_refreshDates(const QString & avatar, const QString & date)
   // Sort the list so that the most recent stats are first.
   qSort(dates.begin(), dates.end(), [](const QString & s1, const QString & s2)
   {
-    static const QString format(QStringLiteral("m/d/y h:m:s"));
+    static const QString format(QStringLiteral("M/d/yyyy h:m:s AP"));
     return QDateTime::fromString(s2, format) < QDateTime::fromString(s1, format);
   });
 
