@@ -207,7 +207,7 @@ const QString & AvatarDao::StatItem::name() const
   return m_name;
 }
 
-const QString &AvatarDao::StatItem::value() const
+const QString & AvatarDao::StatItem::value() const
 {
   return m_value;
 }
