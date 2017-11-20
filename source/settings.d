@@ -31,6 +31,7 @@ class Settings
     }
   }
 
+  // Gets the log folder path.
   string getLogFolder() const
   {
     string logFolder;
@@ -59,6 +60,7 @@ class Settings
     return logFolder;
   }
 
+  // Sets the log folder path.
   void setLogFolder(string logFolder)
   {
     m_json[m_logFolder] = logFolder;
