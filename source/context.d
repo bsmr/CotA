@@ -110,7 +110,7 @@ class UIContext
     auto dates = m_avatarLogData.getStatDates(avatar);
     if (dates.length == 0)
     {
-      setStatusMessage(format!(t("No stats found for %s"))(avatar));
+      setStatusMessage(format(t("No stats found for %s"), avatar));
       return;
     }
 
@@ -136,7 +136,7 @@ class UIContext
     auto stats = m_avatarLogData.getStats(avatar, date);
     if (stats.length == 0)
     {
-      setStatusMessage(format!(t("No stats found for %s"))(avatar));
+      setStatusMessage(format(t("No stats found for %s"), avatar));
       return;
     }
 
@@ -180,9 +180,9 @@ class UIContext
     string[3] colors;
     if (m_color.alpha > 0.0)
     {
-      colors[0] = "<span foreground='" ~ colorToHTML(m_color) ~ "'>%s</span>";
-      colors[1] = "<span foreground='" ~ colorToHTML(m_color, 0.75) ~ "'>%s</span>";
-      colors[2] = "<span foreground='" ~ colorToHTML(m_color, 0.5) ~ "'>%s</span>";
+      colors[0] = "<span foreground='" ~ htmlColor(m_color) ~ "'>%s</span>";
+      colors[1] = "<span foreground='" ~ htmlColor(m_color, 0.75) ~ "'>%s</span>";
+      colors[2] = "<span foreground='" ~ htmlColor(m_color, 0.5) ~ "'>%s</span>";
     }
     else
     {
@@ -204,7 +204,7 @@ class UIContext
       }
     }
 
-    setStatusMessage(format!(t("Showing stats for %s from %s"))(avatar, date));
+    setStatusMessage(format(t("Showing stats for %s from %s"), avatar, date));
   }
 
   private void selectLogFolder()
@@ -245,7 +245,7 @@ class UIContext
     // Create the dialog with OK and Cancel buttons.
     auto notesDialog = new Dialog();
     notesDialog.setDefaultSize(300, 300);
-    notesDialog.setTitle(format!(t("Notes for %s"))(avatar));
+    notesDialog.setTitle(format(t("Notes for %s"), avatar));
     notesDialog.setTransientFor(m_mainWindow);
     notesDialog.addButtons([StockID.OK, StockID.CANCEL], [ResponseType.OK, ResponseType.CANCEL]);
 
