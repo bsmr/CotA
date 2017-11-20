@@ -55,6 +55,7 @@ class UIContext
   private ListStore m_statsListStore;
   private MenuItem m_viewMenuItem;
   private RGBA m_color;
+  private Button m_notesButton;
 
   private void setStatusMessage(string message)
   {
@@ -67,6 +68,8 @@ class UIContext
     m_avatarsComboBox.removeAll();
     m_datesComboBox.removeAll();
     m_statsListStore.clear();
+    m_notesButton.setSensitive(false);
+    m_viewMenuItem.setSensitive(false);
 
     // Get the avatar names that have log entries.
     auto avatars = m_avatarLogData.getAvatars();
@@ -92,6 +95,8 @@ class UIContext
     // If no avatar is selected then try the very first one in the combo box.
     if (m_avatarsComboBox.getActive() < 0)
       m_avatarsComboBox.setActive(0);
+
+    m_notesButton.setSensitive(m_avatarsComboBox.getActive() >= 0);
   }
 
   private void populateDates(string avatar)
@@ -200,6 +205,7 @@ class UIContext
       }
     }
 
+    m_viewMenuItem.setSensitive(true);
     setStatusMessage(format(t("Showing stats for %s from %s"), avatar, date));
   }
 
@@ -343,6 +349,9 @@ class UIContext
     m_statsListStore = new ListStore([GType.STRING, GType.STRING]);
     m_avatarsComboBox = new ComboBoxText(false);
     m_datesComboBox = new ComboBoxText(false);
+    m_notesButton = new Button(t("Notes"), (Button) {
+      modifyNotes(m_avatarsComboBox.getActiveText());
+    });
 
     // Get the text color.
     auto styleContext = m_mainWindow.getStyleContext();
@@ -425,10 +434,6 @@ class UIContext
     statsTreeView.appendColumn(valueColumn);
     statsTreeView.setModel(m_statsListStore);
 
-    auto notesButton = new Button(t("Notes"), (Button) {
-      modifyNotes(m_avatarsComboBox.getActiveText());
-    });
-
     auto toolBox = new Box(Orientation.HORIZONTAL, 5);
     toolBox.setMarginTop(3);
     toolBox.setMarginBottom(3);
@@ -437,7 +442,7 @@ class UIContext
     toolBox.packStart(new Label(t("Avatar:")), false, true, 0);
     toolBox.packStart(m_avatarsComboBox, false, true, 0);
     toolBox.packStart(m_datesComboBox, true, true, 0);
-    toolBox.packStart(notesButton, false, true, 0);
+    toolBox.packStart(m_notesButton, false, true, 0);
 
     auto statsBox = new Box(Orientation.VERTICAL, 0);
     statsBox.packStart(toolBox, false, true, 0);
