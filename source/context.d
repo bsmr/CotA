@@ -85,7 +85,7 @@ class UIContext
       m_avatarsComboBox.appendText(avatar);
     }
 
-    // Attempt the select the default avatar.
+    // Attempt to select the default avatar.
     if (defaultAvatar.length > 0)
       m_avatarsComboBox.setActiveText(defaultAvatar);
 
@@ -100,11 +100,7 @@ class UIContext
     m_statsListStore.clear();
 
     // Update the settings.
-    if (avatar != m_settings.getAvatar())
-    {
-      m_settings.setAvatar(avatar);
-      m_settings.store();
-    }
+    m_settings.setAvatar(avatar);
 
     // Get the stat dates for the avatar.
     auto dates = m_avatarLogData.getStatDates(avatar);
@@ -211,20 +207,17 @@ class UIContext
   {
     auto folderDialog = new FileChooserDialog("SotA log folder...",
         m_mainWindow, FileChooserAction.SELECT_FOLDER);
-    folderDialog.setFilename(m_avatarLogData.getPath());
+    folderDialog.setFilename(m_settings.getLogFolder());
 
     switch (folderDialog.run())
     {
     case ResponseType.OK:
       {
         const string folder = folderDialog.getFilename();
-        if (folder != m_avatarLogData.getPath())
+        if (m_settings.setLogFolder(folder))
         {
           m_avatarLogData = new AvatarLogData(folder);
           populateAvatars(m_avatarsComboBox.getActiveText());
-
-          m_settings.setLogFolder(folder);
-          m_settings.store();
         }
       }
 
@@ -267,7 +260,6 @@ class UIContext
     {
     case ResponseType.OK:
       m_settings.setNotes(avatar, textView.getBuffer().getText());
-      m_settings.store();
       break;
 
     default:

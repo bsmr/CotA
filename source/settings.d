@@ -19,6 +19,15 @@ class Settings
   private string m_filePath;
   private JSONValue m_json;
 
+  private bool store() const
+  {
+    if (m_json.type != JSON_TYPE.OBJECT)
+      return false;
+
+    write(m_filePath, m_json.toString());
+    return true;
+  }
+
   /// Construction.
   this(string appPath)
   {
@@ -61,9 +70,13 @@ class Settings
   }
 
   // Sets the log folder path.
-  void setLogFolder(string logFolder)
+  bool setLogFolder(string logFolder)
   {
+    if (logFolder == getLogFolder())
+      return false;
+
     m_json[m_logFolder] = logFolder;
+    return store();
   }
 
   /// Gets the current avatar name.
@@ -79,9 +92,13 @@ class Settings
   }
 
   /// Sets the current avatar name.
-  void setAvatar(string avatar)
+  bool setAvatar(string avatar)
   {
+    if (avatar == getAvatar())
+      return false;
+
     m_json[m_avatar] = avatar;
+    return store();
   }
 
   /// Get the notes for the specified avatar.
@@ -97,18 +114,12 @@ class Settings
   }
 
   /// Set the notes for the specified avatar.
-  void setNotes(string avatar, string notes)
+  bool setNotes(string avatar, string notes)
   {
-    if (avatar.length == 0)
-      return;
+    if ((avatar.length == 0) || (notes == getNotes(avatar)))
+      return false;
 
     m_json[avatar ~ m_notes] = notes;
-  }
-
-  /// Store the current settings.
-  void store() const
-  {
-    if (!m_json.isNull())
-      write(m_filePath, m_json.toString());
+    return store();
   }
 }

@@ -56,12 +56,6 @@ public class AvatarLogData
     m_path = path;
   }
 
-  /// Returns the log folder path.
-  string getPath() const
-  {
-    return m_path;
-  }
-
   /// Returns a list of avatar names.
   string[] getAvatars() const
   {
