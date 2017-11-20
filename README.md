@@ -1,18 +1,10 @@
 # Companion of the Avatar
 CotA is a small application to nicely display the stats ("/stats") recorded to a chat log file from Shroud of the Avatar. 
 
-![screenshot](http://m8.i.pbase.com/o10/09/605909/1/164136608.MYAqmVuY.Screenshotfrom20170626133630.png)
+![screenshot](http://a4.pbase.com/o10/09/605909/1/164136608.wYwamDcp.Screenshotfrom20171119015429.png)
 
-To build CotA, you will need to install Qt5, which is totally free (https://www.qt.io). Once Qt is installed, start Qt Creator and open the project file CotA.pro. The first time the project is opened, Qt Creator will prompt for the project configuration you desire. Select only a desktop configuration (others may be present, like iOS or Android, depending on what you installed) and click the "Configure Project" button.
+CotA was originally written in C++ using the Qt framework but, for various reasons, I have since completely rewritten it in D using GTK+ as the framework. The main benefit of this is that there is no installation process for the application. Just grab the Linux binary above and run it. The only requirement is that you have GTK+ 3.22 or above installed. If you're running an up-to-date distribution then it's likely that it's already installed. The app should also work on Windows and Mac (provided GTK+ 3.22 is installed) but you will have to build that binary yourself.
 
-Next, click the computer icon in the lower left with the word "Debug" below it and select "Release". Finally, click the green run button below that. This will build and run the executable. After that, you won't need to run Qt Creator again unless you want to rebuild CotA.
-
-The CotA executable can be found in a folder next to the project folder with a name something like "build-CotA-Desktop_Qt_5_7_0_GCC_64bit-Release". You can move this executable wherever you like and double click to run it.
-
-On fedora, you may need to install the C++ compiler and libGL:
-```
-sudo dnf install gcc-c++ mesa-libGL-devel
-```
+The application will create a json file next to itself to persist settings. Deleting that file (cota.json on Linux) is safe and will merely cause the app to use the defaults the next time it's run.
 
 This code is released as public domain. Do with it as you want but I am not liable for any of it.
-

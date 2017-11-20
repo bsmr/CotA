@@ -1,0 +1,14 @@
+{
+	"name": "cota",
+	"authors": [
+		"Barugon"
+	],
+	"dependencies": {
+		"gtk-d": "~>3.7.1"
+	},
+	"description": "Companion of the Avatar",
+	"license": "public domain",
+  "dflags": [
+    "-J."
+  ]
+}
