@@ -53,8 +53,10 @@ class UIContext
   private ComboBoxText m_avatarsComboBox;
   private ComboBoxText m_datesComboBox;
   private ListStore m_statsListStore;
-  private MenuItem m_viewMenuItem;
   private RGBA m_color;
+
+  private MenuItem m_refreshMenuItem;
+  private MenuItem m_filterMenuItem;
   private Button m_notesButton;
 
   private void setStatusMessage(string message)
@@ -68,8 +70,9 @@ class UIContext
     m_avatarsComboBox.removeAll();
     m_datesComboBox.removeAll();
     m_statsListStore.clear();
+    m_refreshMenuItem.setSensitive(false);
+    m_filterMenuItem.setSensitive(false);
     m_notesButton.setSensitive(false);
-    m_viewMenuItem.setSensitive(false);
 
     // Get the avatar names that have log entries.
     auto avatars = m_avatarLogData.getAvatars();
@@ -95,14 +98,15 @@ class UIContext
     // If no avatar is selected then try the very first one in the combo box.
     if (m_avatarsComboBox.getActive() < 0)
       m_avatarsComboBox.setActive(0);
-
-    m_notesButton.setSensitive(m_avatarsComboBox.getActive() >= 0);
   }
 
   private void populateDates(string avatar)
   {
     m_datesComboBox.removeAll();
     m_statsListStore.clear();
+    m_refreshMenuItem.setSensitive(true);
+    m_filterMenuItem.setSensitive(false);
+    m_notesButton.setSensitive(avatar.length > 0);
 
     // Update the settings.
     m_settings.setAvatar(avatar);
@@ -205,7 +209,7 @@ class UIContext
       }
     }
 
-    m_viewMenuItem.setSensitive(true);
+    m_filterMenuItem.setSensitive(true);
     setStatusMessage(format(t("Showing stats for %s from %s"), avatar, date));
   }
 
@@ -385,28 +389,28 @@ class UIContext
     fileMenuItem.setSubmenu(fileMenu);
 
     // Refresh menu item.
-    auto refreshMenuItem = new MenuItem((MenuItem) {
+    m_refreshMenuItem = new MenuItem((MenuItem) {
       populateAvatars(m_avatarsComboBox.getActiveText());
     }, t("_Refresh Stats"), t("F5"));
-    refreshMenuItem.addAccelerator("activate", accelGroup, GdkKeysyms.GDK_F5,
+    m_refreshMenuItem.addAccelerator("activate", accelGroup, GdkKeysyms.GDK_F5,
         cast(GdkModifierType) 0, GtkAccelFlags.VISIBLE);
 
     // Filter menu item.
-    auto filterMenuItem = new MenuItem((MenuItem) {
+    m_filterMenuItem = new MenuItem((MenuItem) {
       auto text = getFilter();
       if (text.length > 0)
         populateStats(m_avatarsComboBox.getActiveText(), m_datesComboBox.getActiveText(), text);
     }, t("_Filter Stats"), t("Ctrl+F"));
-    filterMenuItem.addAccelerator("activate", accelGroup, GdkKeysyms.GDK_F,
+    m_filterMenuItem.addAccelerator("activate", accelGroup, GdkKeysyms.GDK_F,
         GdkModifierType.CONTROL_MASK, GtkAccelFlags.VISIBLE);
 
     // Setup the view menu.
     auto viewMenu = new Menu();
-    viewMenu.append(refreshMenuItem);
-    viewMenu.append(filterMenuItem);
+    viewMenu.append(m_refreshMenuItem);
+    viewMenu.append(m_filterMenuItem);
 
-    m_viewMenuItem = new MenuItem(t("_View"));
-    m_viewMenuItem.setSubmenu(viewMenu);
+    auto viewMenuItem = new MenuItem(t("_View"));
+    viewMenuItem.setSubmenu(viewMenu);
 
     // About menu item.
     auto aboutMenuItem = new MenuItem((MenuItem) { about(); }, t("_About"));
@@ -421,7 +425,7 @@ class UIContext
     // Initialize the menu bar.
     auto menuBar = new MenuBar();
     menuBar.append(fileMenuItem);
-    menuBar.append(m_viewMenuItem);
+    menuBar.append(viewMenuItem);
     menuBar.append(helpMenuItem);
 
     auto nameColumn = new TreeViewColumn(t("Name"), new CellRendererText(), "markup", 0);
@@ -455,11 +459,21 @@ class UIContext
     notebook.appendPage(statsBox, t("Stats"));
     notebook.appendPage(moongatesBox, t("Moongates"));
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
-      // Show the view menu only if the stats page is selected.
-      if (pageNum == 0)
-        m_viewMenuItem.show();
+      if (pageNum > 0)
+      {
+        // Disable stat related view menu items if the stats page is not active.
+        m_refreshMenuItem.setSensitive(false);
+        m_filterMenuItem.setSensitive(false);
+      }
       else
-        m_viewMenuItem.hide();
+      {
+        // Restore stat related view menu items.
+        m_refreshMenuItem.setSensitive(true);
+
+        TreeIter iter;
+        if (m_statsListStore.getIterFirst(iter))
+          m_filterMenuItem.setSensitive(true);
+      }
     });
 
     auto mainBox = new Box(Orientation.VERTICAL, 0);
