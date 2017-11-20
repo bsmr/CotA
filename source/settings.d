@@ -9,15 +9,17 @@ private import std.json;
 /// Simple application settings object.
 class Settings
 {
-  private enum {
+  private enum
+  {
     m_logFolder = "Log Folder",
     m_avatar = "Avatar",
     m_notes = " Notes"
   }
+
   private string m_filePath;
   private JSONValue m_json;
 
-  /// Costruction.
+  /// Construction.
   this(string appPath)
   {
     m_filePath = appPath ~ ".json";
