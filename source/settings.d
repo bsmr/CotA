@@ -9,11 +9,11 @@ private import std.json;
 /// Simple application settings object.
 class Settings
 {
-  private enum
+  private enum Keys
   {
-    m_logFolder = "Log Folder",
-    m_avatar = "Avatar",
-    m_notes = " Notes"
+    logFolder = "Log Folder",
+    avatar = "Avatar",
+    notes = " Notes"
   }
 
   private string m_filePath;
@@ -46,7 +46,7 @@ class Settings
     string logFolder;
     if (m_json.type == JSON_TYPE.OBJECT)
     {
-      if (auto value = m_logFolder in m_json)
+      if (auto value = Keys.logFolder in m_json)
         logFolder = value.str;
     }
 
@@ -75,7 +75,7 @@ class Settings
     if (logFolder == getLogFolder())
       return false;
 
-    m_json[m_logFolder] = logFolder;
+    m_json[Keys.logFolder] = logFolder;
     return store();
   }
 
@@ -84,7 +84,7 @@ class Settings
   {
     if (m_json.type == JSON_TYPE.OBJECT)
     {
-      if (auto value = m_avatar in m_json)
+      if (auto value = Keys.avatar in m_json)
         return value.str;
     }
 
@@ -97,7 +97,7 @@ class Settings
     if (avatar == getAvatar())
       return false;
 
-    m_json[m_avatar] = avatar;
+    m_json[Keys.avatar] = avatar;
     return store();
   }
 
@@ -106,7 +106,7 @@ class Settings
   {
     if ((avatar.length > 0) && (m_json.type == JSON_TYPE.OBJECT))
     {
-      if (auto value = (avatar ~ m_notes) in m_json)
+      if (auto value = (avatar ~ Keys.notes) in m_json)
         return value.str;
     }
 
@@ -119,7 +119,7 @@ class Settings
     if ((avatar.length == 0) || (notes == getNotes(avatar)))
       return false;
 
-    m_json[avatar ~ m_notes] = notes;
+    m_json[avatar ~ Keys.notes] = notes;
     return store();
   }
 }
