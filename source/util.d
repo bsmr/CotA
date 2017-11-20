@@ -14,7 +14,7 @@ public string t(string text)
 }
 
 /// Converts an RGBA color to text in HTML notation.
-string colorToHTML(RGBA color, double opacity = 1.0)
+string htmlColor(RGBA color, double opacity = 1.0)
 {
   return format!("#%02x%02x%02x%02x")(cast(int)(color.red() * 255),
       cast(int)(color.green() * 255), cast(int)(color.blue() * 255),
