@@ -88,7 +88,7 @@ class Settings
         return value.str;
     }
 
-    return "";
+    return [];
   }
 
   /// Sets the current avatar name.
@@ -110,7 +110,7 @@ class Settings
         return value.str;
     }
 
-    return "";
+    return [];
   }
 
   /// Set the notes for the specified avatar.

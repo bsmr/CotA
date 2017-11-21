@@ -21,7 +21,7 @@ private string getDate(const char[] line, string search)
     }
   }
 
-  return "";
+  return [];
 }
 
 private string getText(const char[] line, string date, string search)
@@ -30,7 +30,7 @@ private string getText(const char[] line, string date, string search)
   if (line.startsWith(start) && ((search.length == 0) || (line.indexOf(search) > 0)))
     return line[start.length .. $].dup();
 
-  return "";
+  return [];
 }
 
 /// Class to read stat entries from SotA chat logs.
@@ -44,7 +44,7 @@ public class AvatarLogData
     return exists(m_path) && isDir(m_path);
   }
 
-  private auto getLogFileEntries(string avatar = "") const
+  private auto getLogFileEntries(string avatar = []) const
   {
     return dirEntries(m_path, "SotAChatLog_%1_????-??-??.txt".replace("%1",
         (avatar.length == 0 ? "*" : avatar.replace(" ", "_"))), SpanMode.shallow);

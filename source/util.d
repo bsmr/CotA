@@ -27,12 +27,12 @@ public string dateSortable(string date)
   // Split the string into the date, time and am/pm components.
   immutable auto components = date.split();
   if (components.length != 3)
-    return "";
+    return [];
 
   // Split the date component into the year, month and day parts.
   immutable auto dateParts = components[0].split("/");
   if (dateParts.length != 3)
-    return "";
+    return [];
 
   // Convert the year, month and day to integers.
   immutable auto month = to!(int)(dateParts[0]);
@@ -42,7 +42,7 @@ public string dateSortable(string date)
   // Split the time component into the hour, minute and second parts.
   immutable auto timeParts = components[1].split(":");
   if (timeParts.length != 3)
-    return "";
+    return [];
 
   // Convert the hour, minute and second to integers and convert to 24 hour
   // format.

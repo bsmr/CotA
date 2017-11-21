@@ -65,7 +65,7 @@ class UIContext
     m_statusBar.push(0, message);
   }
 
-  private void populateAvatars(string defaultAvatar = "")
+  private void populateAvatars(string defaultAvatar = [])
   {
     m_avatarsComboBox.removeAll();
     m_datesComboBox.removeAll();
@@ -133,7 +133,7 @@ class UIContext
     m_datesComboBox.setActive(0);
   }
 
-  private void populateStats(string avatar, string date, string filter = "")
+  private void populateStats(string avatar, string date, string filter = [])
   {
     m_statsListStore.clear();
 
