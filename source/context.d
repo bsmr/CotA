@@ -150,9 +150,6 @@ class UIContext
       "AdventurerLevel" : 0, "ProducerLevel" : 1
     ];
 
-    // Convert the filter string to lower case.
-    filter = filter.toLower();
-
     // Sort the stats according to the order value.
     string[2][][3] bins;
     foreach (stat; stats)
@@ -161,8 +158,7 @@ class UIContext
       bool searched;
       if (filter.length > 0)
       {
-        // Lower case comparison.
-        if (stat[0].toLower().indexOf(filter) >= 0)
+        if (stat[0].indexOf(filter, CaseSensitive.no) >= 0)
           searched = true;
         else
           continue;
@@ -215,7 +211,7 @@ class UIContext
 
   private void selectLogFolder()
   {
-    auto folderDialog = new FileChooserDialog("SotA log folder...",
+    auto folderDialog = new FileChooserDialog(t("SotA log folder..."),
         m_mainWindow, FileChooserAction.SELECT_FOLDER);
     folderDialog.setFilename(m_settings.getLogFolder());
 
@@ -254,8 +250,11 @@ class UIContext
 
     // Add the text entry field.
     auto textView = new TextView();
-    textView.getBuffer().setText(m_settings.getNotes(avatar));
     textView.setVisible(true);
+
+    auto text = m_settings.getNotes(avatar);
+    if (text.length > 0)
+      textView.getBuffer().setText(text);
 
     auto contentArea = notesDialog.getContentArea();
     contentArea.setMarginLeft(3);
@@ -334,7 +333,7 @@ class UIContext
     aboutDialog.setTransientFor(m_mainWindow);
     aboutDialog.setAuthors(["Barugon"]);
     aboutDialog.setComments(m_mainWindow.getTitle());
-    aboutDialog.setLicense("The CotA application and it's source code are public domain.");
+    aboutDialog.setLicense(t("The CotA application and it's source code are public domain."));
     aboutDialog.setLogo(logo);
     aboutDialog.setProgramName("CotA");
     aboutDialog.setVersion(versionString);
@@ -453,7 +452,7 @@ class UIContext
     statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
 
     auto moongatesBox = new Box(Orientation.VERTICAL, 0);
-    moongatesBox.packStart(new Label("Coming soon™"), true, true, 0);
+    moongatesBox.packStart(new Label(t("Coming soon™")), true, true, 0);
 
     auto notebook = new Notebook();
     notebook.appendPage(statsBox, t("Stats"));
