@@ -44,7 +44,7 @@ private import std.stdio;
 /// UIContext is simply a container for the application's UI.
 class UIContext
 {
-  private enum versionString = "1.3.0";
+  private enum versionString = "1.3.1";
 
   private AvatarLogData m_avatarLogData;
   private Settings m_settings;
