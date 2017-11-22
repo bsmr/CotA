@@ -36,7 +36,7 @@ private string getText(const char[] line, string date, string search)
 /// Class to read stat entries from SotA chat logs.
 public class AvatarLogData
 {
-  private enum m_adventurerLevel = "AdventurerLevel:";
+  private enum m_adventurerLevel = "AdventurerLevel: ";
   private string m_path;
 
   private bool isPathValid() const
@@ -143,7 +143,7 @@ public class AvatarLogData
 
         if (name.endsWith(":"))
         {
-          // Exclude colon from the stat name. 
+          // Exclude the trailing colon from the stat name. 
           statList ~= [name[0 .. $ - 1], fields[0]];
           fields = fields[1 .. $];
         }
