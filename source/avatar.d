@@ -46,8 +46,8 @@ public class AvatarLogData
 
   private auto getLogFileEntries(string avatar = []) const
   {
-    return dirEntries(m_path, "SotAChatLog_" ~ (avatar.length == 0 ? "*"
-        : avatar.replace(" ", "_")) ~ "_????-??-??.txt", SpanMode.shallow);
+    return dirEntries(m_path, "SotAChatLog_" ~ (avatar.length > 0
+        ? avatar.replace(" ", "_") : "*") ~ "_????-??-??.txt", SpanMode.shallow);
   }
 
   /// Constructor.
