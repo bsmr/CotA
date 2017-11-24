@@ -60,16 +60,16 @@ double getLunarPhase()
 {
   // Get the current UTC time.
   auto dateTime = cast(DateTime) Clock.currTime(UTC());
-  
+
   // Calculate the number of days since Tuesday.
   int dayOffset = dateTime.dayOfWeek() - 2;
   if (dayOffset < 0)
     dayOffset += 7;
 
   // Get the duration since midnight, Tuesday.
-  immutable auto duration = dateTime - DateTime(dateTime.year, dateTime.month,
-      dateTime.day - dayOffset, 0, 0, 0);
-  
+  immutable auto duration = dateTime - DateTime(dateTime.year(),
+      dateTime.month(), dateTime.day() - dayOffset, 0, 0, 0);
+
   // Calculate the lunar phase from the duration.
   return (duration.total!("seconds") % 4200) / 525.0;
 }
