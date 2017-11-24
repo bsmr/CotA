@@ -32,6 +32,7 @@ private import gtk.Notebook;
 private import gtk.ScrolledWindow;
 private import gtk.SeparatorMenuItem;
 private import gtk.Statusbar;
+private import gtk.Table;
 private import gtk.TextView;
 private import gtk.TreeIter;
 private import gtk.TreeView;
@@ -59,8 +60,20 @@ class UIContext
   private MenuItem m_filterMenuItem;
   private Button m_notesButton;
 
-  private void setStatusMessage(string message)
+  private string[int] m_statusMessages;
+
+  private void setStatusMessage(int page, string message = [])
   {
+    if (message is null)
+    {
+      if (auto val = page in m_statusMessages)
+        message = *val;
+      else
+        message = "";
+    }
+    else
+      m_statusMessages[page] = message;
+
     m_statusBar.removeAll(0);
     m_statusBar.push(0, message);
   }
@@ -78,7 +91,7 @@ class UIContext
     auto avatars = m_avatarLogData.getAvatars();
     if (avatars.length == 0)
     {
-      setStatusMessage(t("No avatars found"));
+      setStatusMessage(0, t("No avatars found"));
       return;
     }
 
@@ -115,7 +128,7 @@ class UIContext
     auto dates = m_avatarLogData.getStatDates(avatar);
     if (dates.length == 0)
     {
-      setStatusMessage(format(t("No stats found for %s"), avatar));
+      setStatusMessage(0, format(t("No stats found for %s"), avatar));
       return;
     }
 
@@ -141,7 +154,7 @@ class UIContext
     auto stats = m_avatarLogData.getStats(avatar, date);
     if (stats.length == 0)
     {
-      setStatusMessage(format(t("No stats found for %s"), avatar));
+      setStatusMessage(0, format(t("No stats found for %s"), avatar));
       return;
     }
 
@@ -206,7 +219,7 @@ class UIContext
     }
 
     m_filterMenuItem.setSensitive(true);
-    setStatusMessage(format(t("Showing stats for %s from %s"), avatar, date));
+    setStatusMessage(0, format(t("Showing stats for %s from %s"), avatar, date));
   }
 
   private void selectLogFolder()
@@ -276,6 +289,43 @@ class UIContext
     }
 
     notesDialog.close();
+  }
+
+  private auto setupStatsPage()
+  {
+    auto nameColumn = new TreeViewColumn(t("Name"), new CellRendererText(), "markup", 0);
+    nameColumn.setExpand(true);
+
+    auto valueColumn = new TreeViewColumn(t("Value"), new CellRendererText(), "markup", 1);
+
+    auto statsTreeView = new TreeView();
+    statsTreeView.appendColumn(nameColumn);
+    statsTreeView.appendColumn(valueColumn);
+    statsTreeView.setModel(m_statsListStore);
+
+    auto toolBox = new Box(Orientation.HORIZONTAL, 5);
+    toolBox.setMarginTop(3);
+    toolBox.setMarginBottom(3);
+    toolBox.setMarginLeft(5);
+    toolBox.setMarginRight(5);
+    toolBox.packStart(new Label(t("Avatar:")), false, true, 0);
+    toolBox.packStart(m_avatarsComboBox, false, true, 0);
+    toolBox.packStart(m_datesComboBox, true, true, 0);
+    toolBox.packStart(m_notesButton, false, true, 0);
+
+    auto statsBox = new Box(Orientation.VERTICAL, 0);
+    statsBox.packStart(toolBox, false, true, 0);
+    statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
+
+    return statsBox;
+  }
+
+  private auto setupLunarRiftsPage()
+  {
+    auto riftsBox = new Box(Orientation.VERTICAL, 0);
+    riftsBox.packStart(new Label(t("Coming soon™")), true, true, 0);
+
+    return riftsBox;
   }
 
   private string getFilter()
@@ -427,36 +477,9 @@ class UIContext
     menuBar.append(viewMenuItem);
     menuBar.append(helpMenuItem);
 
-    auto nameColumn = new TreeViewColumn(t("Name"), new CellRendererText(), "markup", 0);
-    nameColumn.setExpand(true);
-
-    auto valueColumn = new TreeViewColumn(t("Value"), new CellRendererText(), "markup", 1);
-
-    auto statsTreeView = new TreeView();
-    statsTreeView.appendColumn(nameColumn);
-    statsTreeView.appendColumn(valueColumn);
-    statsTreeView.setModel(m_statsListStore);
-
-    auto toolBox = new Box(Orientation.HORIZONTAL, 5);
-    toolBox.setMarginTop(3);
-    toolBox.setMarginBottom(3);
-    toolBox.setMarginLeft(5);
-    toolBox.setMarginRight(5);
-    toolBox.packStart(new Label(t("Avatar:")), false, true, 0);
-    toolBox.packStart(m_avatarsComboBox, false, true, 0);
-    toolBox.packStart(m_datesComboBox, true, true, 0);
-    toolBox.packStart(m_notesButton, false, true, 0);
-
-    auto statsBox = new Box(Orientation.VERTICAL, 0);
-    statsBox.packStart(toolBox, false, true, 0);
-    statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
-
-    auto riftsBox = new Box(Orientation.VERTICAL, 0);
-    riftsBox.packStart(new Label(t("Coming soon™")), true, true, 0);
-
     auto notebook = new Notebook();
-    notebook.appendPage(statsBox, t("Stats"));
-    notebook.appendPage(riftsBox, t("Lunar Rifts"));
+    notebook.appendPage(setupStatsPage(), t("Stats"));
+    notebook.appendPage(setupLunarRiftsPage(), t("Lunar Rifts"));
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
       if (pageNum > 0)
       {
@@ -473,6 +496,8 @@ class UIContext
         if (m_statsListStore.getIterFirst(iter))
           m_filterMenuItem.setSensitive(true);
       }
+
+      setStatusMessage(pageNum);
     });
 
     auto mainBox = new Box(Orientation.VERTICAL, 0);
