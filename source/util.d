@@ -70,6 +70,7 @@ double getLunarPhase()
   immutable auto duration = dateTime - DateTime(dateTime.year(),
       dateTime.month(), dateTime.day() - dayOffset, 0, 0, 0);
 
-  // Calculate the lunar phase from the duration.
+  // Calculate the lunar phase from the duration. Each phase is 525 seconds and
+  // there are 8 phases, for a total of 4200 seconds per lunar cycle.
   return (duration.total!("seconds") % 4200) / 525.0;
 }
