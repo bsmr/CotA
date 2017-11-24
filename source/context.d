@@ -451,12 +451,12 @@ class UIContext
     statsBox.packStart(toolBox, false, true, 0);
     statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
 
-    auto moongatesBox = new Box(Orientation.VERTICAL, 0);
-    moongatesBox.packStart(new Label(t("Coming soon™")), true, true, 0);
+    auto riftsBox = new Box(Orientation.VERTICAL, 0);
+    riftsBox.packStart(new Label(t("Coming soon™")), true, true, 0);
 
     auto notebook = new Notebook();
     notebook.appendPage(statsBox, t("Stats"));
-    notebook.appendPage(moongatesBox, t("Moongates"));
+    notebook.appendPage(riftsBox, t("Lunar Rifts"));
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
       if (pageNum > 0)
       {
