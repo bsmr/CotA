@@ -47,6 +47,12 @@ class UIContext
 {
   private enum versionString = "1.3.1";
 
+  private enum Page
+  {
+    stats = 0,
+    rifts = 1
+  }
+
   private immutable string[8] m_places = [
     t("Blood River"), t("Solace Bridge"), t("Highvale"), t("Brookside"),
     t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")
@@ -106,7 +112,7 @@ class UIContext
     auto avatars = m_avatarLogData.getAvatars();
     if (avatars.length == 0)
     {
-      setStatusMessage(0, t("No avatars found"));
+      setStatusMessage(Page.stats, t("No avatars found"));
       return;
     }
 
@@ -143,7 +149,7 @@ class UIContext
     auto dates = m_avatarLogData.getStatDates(avatar);
     if (dates.length == 0)
     {
-      setStatusMessage(0, format(t("No stats found for %s"), avatar));
+      setStatusMessage(Page.stats, format(t("No stats found for %s"), avatar));
       return;
     }
 
@@ -169,7 +175,7 @@ class UIContext
     auto stats = m_avatarLogData.getStats(avatar, date);
     if (stats.length == 0)
     {
-      setStatusMessage(0, format(t("No stats found for %s"), avatar));
+      setStatusMessage(Page.stats, format(t("No stats found for %s"), avatar));
       return;
     }
 
@@ -234,7 +240,7 @@ class UIContext
     }
 
     m_filterMenuItem.setSensitive(true);
-    setStatusMessage(0, format(t("Showing stats for %s from %s"), avatar, date));
+    setStatusMessage(Page.stats, format(t("Showing stats for %s from %s"), avatar, date));
   }
 
   private void selectLogFolder()
@@ -515,13 +521,13 @@ class UIContext
       m_riftLabels[index].setMarginBottom(3);
       riftsGrid.attach(m_riftLabels[index], 2, index, 1, 1);
     }
-    setStatusMessage(1, t("Coming soon™"));
+    setStatusMessage(Page.rifts, t("Coming soon™"));
 
     auto notebook = new Notebook();
-    notebook.appendPage(statsBox, t("Stats"));
-    notebook.appendPage(riftsGrid, t("Lunar Rifts"));
+    notebook.insertPage(statsBox, new Label(t("Stats")), Page.stats);
+    notebook.insertPage(riftsGrid, new Label(t("Lunar Rifts")), Page.rifts);
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
-      if (pageNum > 0)
+      if (pageNum != Page.stats)
       {
         // Disable stat related view menu items if the stats page is not active.
         m_refreshMenuItem.setSensitive(false);
