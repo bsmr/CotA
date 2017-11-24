@@ -21,6 +21,7 @@ private import gtk.Container;
 private import gtk.Dialog;
 private import gtk.Entry;
 private import gtk.FileChooserDialog;
+private import gtk.Grid;
 private import gtk.Label;
 private import gtk.ListStore;
 private import gtk.Main;
@@ -32,7 +33,6 @@ private import gtk.Notebook;
 private import gtk.ScrolledWindow;
 private import gtk.SeparatorMenuItem;
 private import gtk.Statusbar;
-private import gtk.Table;
 private import gtk.TextView;
 private import gtk.TreeIter;
 private import gtk.TreeView;
@@ -46,6 +46,17 @@ private import std.stdio;
 class UIContext
 {
   private enum versionString = "1.3.1";
+
+  private immutable string[8] m_places = [
+    t("Blood River"), t("Solace Bridge"), t("Highvale"), t("Brookside"),
+    t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")
+  ];
+
+  private immutable string[8] m_phases = [
+    t("New Moon"), t("Waxing Crescent"), t("First Quarter"),
+    t("Waxing Gibbous"), t("Full Moon"), t("Waning Gibbous"),
+    t("Third Quarter"), t("Waning Crescent")
+  ];
 
   private AvatarLogData m_avatarLogData;
   private Settings m_settings;
@@ -61,6 +72,10 @@ class UIContext
   private Button m_notesButton;
 
   private string[int] m_statusMessages;
+
+  private Label[8] m_placeLabels;
+  private Label[8] m_phaseLabels;
+  private Label[8] m_riftLabels;
 
   private void setStatusMessage(int page, string message = [])
   {
@@ -291,43 +306,6 @@ class UIContext
     notesDialog.close();
   }
 
-  private auto setupStatsPage()
-  {
-    auto nameColumn = new TreeViewColumn(t("Name"), new CellRendererText(), "markup", 0);
-    nameColumn.setExpand(true);
-
-    auto valueColumn = new TreeViewColumn(t("Value"), new CellRendererText(), "markup", 1);
-
-    auto statsTreeView = new TreeView();
-    statsTreeView.appendColumn(nameColumn);
-    statsTreeView.appendColumn(valueColumn);
-    statsTreeView.setModel(m_statsListStore);
-
-    auto toolBox = new Box(Orientation.HORIZONTAL, 5);
-    toolBox.setMarginTop(3);
-    toolBox.setMarginBottom(3);
-    toolBox.setMarginLeft(5);
-    toolBox.setMarginRight(5);
-    toolBox.packStart(new Label(t("Avatar:")), false, true, 0);
-    toolBox.packStart(m_avatarsComboBox, false, true, 0);
-    toolBox.packStart(m_datesComboBox, true, true, 0);
-    toolBox.packStart(m_notesButton, false, true, 0);
-
-    auto statsBox = new Box(Orientation.VERTICAL, 0);
-    statsBox.packStart(toolBox, false, true, 0);
-    statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
-
-    return statsBox;
-  }
-
-  private auto setupLunarRiftsPage()
-  {
-    auto riftsBox = new Box(Orientation.VERTICAL, 0);
-    riftsBox.packStart(new Label(t("Coming soon™")), true, true, 0);
-
-    return riftsBox;
-  }
-
   private string getFilter()
   {
     // Create the dialog with OK and Cancel buttons.
@@ -477,9 +455,71 @@ class UIContext
     menuBar.append(viewMenuItem);
     menuBar.append(helpMenuItem);
 
+    auto nameColumn = new TreeViewColumn(t("Name"), new CellRendererText(), "markup", 0);
+    nameColumn.setExpand(true);
+
+    auto valueColumn = new TreeViewColumn(t("Value"), new CellRendererText(), "markup", 1);
+
+    auto statsTreeView = new TreeView();
+    statsTreeView.appendColumn(nameColumn);
+    statsTreeView.appendColumn(valueColumn);
+    statsTreeView.setModel(m_statsListStore);
+
+    auto toolBox = new Box(Orientation.HORIZONTAL, 5);
+    toolBox.setMarginTop(3);
+    toolBox.setMarginBottom(3);
+    toolBox.setMarginLeft(5);
+    toolBox.setMarginRight(5);
+    toolBox.packStart(new Label(t("Avatar:")), false, true, 0);
+    toolBox.packStart(m_avatarsComboBox, false, true, 0);
+    toolBox.packStart(m_datesComboBox, true, true, 0);
+    toolBox.packStart(m_notesButton, false, true, 0);
+
+    auto statsBox = new Box(Orientation.VERTICAL, 0);
+    statsBox.packStart(toolBox, false, true, 0);
+    statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
+
+    auto riftsGrid = new Grid();
+    riftsGrid.setMarginLeft(5);
+    riftsGrid.setMarginRight(5);
+    riftsGrid.setMarginTop(5);
+    riftsGrid.setMarginBottom(5);
+
+    for (int index; index < cast(int) m_places.length; ++index)
+    {
+      m_placeLabels[index] = new Label(m_places[index]);
+      m_placeLabels[index].setHalign(Align.START);
+      m_placeLabels[index].setUseMarkup(true);
+      m_placeLabels[index].setMarginLeft(3);
+      m_placeLabels[index].setMarginRight(3);
+      m_placeLabels[index].setMarginTop(3);
+      m_placeLabels[index].setMarginBottom(3);
+      riftsGrid.attach(m_placeLabels[index], 0, index, 1, 1);
+
+      m_phaseLabels[index] = new Label("<span foreground='" ~ htmlColor(m_color,
+          0.5) ~ "'>" ~ m_phases[index] ~ "</span>");
+      m_phaseLabels[index].setUseMarkup(true);
+      m_phaseLabels[index].setHexpand(true);
+      m_phaseLabels[index].setMarginLeft(3);
+      m_phaseLabels[index].setMarginRight(3);
+      m_phaseLabels[index].setMarginTop(3);
+      m_phaseLabels[index].setMarginBottom(3);
+      riftsGrid.attach(m_phaseLabels[index], 1, index, 1, 1);
+
+      m_riftLabels[index] = new Label("<span foreground='" ~ htmlColor(m_color,
+          0.5) ~ "'>Opens in 0m 0s</span>");
+      m_riftLabels[index].setUseMarkup(true);
+      m_riftLabels[index].setMarginLeft(3);
+      m_riftLabels[index].setMarginRight(3);
+      m_riftLabels[index].setMarginTop(3);
+      m_riftLabels[index].setMarginBottom(3);
+      riftsGrid.attach(m_riftLabels[index], 2, index, 1, 1);
+    }
+    setStatusMessage(1, t("Coming soon™"));
+
     auto notebook = new Notebook();
-    notebook.appendPage(setupStatsPage(), t("Stats"));
-    notebook.appendPage(setupLunarRiftsPage(), t("Lunar Rifts"));
+    notebook.appendPage(statsBox, t("Stats"));
+    notebook.appendPage(riftsGrid, t("Lunar Rifts"));
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
       if (pageNum > 0)
       {
