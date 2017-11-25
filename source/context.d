@@ -551,7 +551,7 @@ class UIContext
     for (int index; index < 8; ++index)
     {
       auto placeLabel = new Label("");
-      placeLabel.setHalign(Align.END);
+      placeLabel.setHalign(Align.START);
       placeLabel.setUseMarkup(true);
       placeLabel.setMarginLeft(3);
       placeLabel.setMarginRight(3);
@@ -569,7 +569,7 @@ class UIContext
       m_riftsgrid.attach(phaseLabel, 1, index, 1, 1);
 
       auto riftLabel = new Label("");
-      riftLabel.setHalign(Align.START);
+      riftLabel.setHalign(Align.END);
       riftLabel.setUseMarkup(true);
       riftLabel.setMarginLeft(3);
       riftLabel.setMarginRight(3);
