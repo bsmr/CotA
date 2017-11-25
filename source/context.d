@@ -41,6 +41,7 @@ private import gtk.TreeViewColumn;
 private import std.algorithm.sorting;
 private import std.string;
 private import std.stdio;
+private import std.uri;
 // dfmt on
 
 /// UIContext is simply a container for the application's UI.
@@ -57,6 +58,17 @@ class UIContext
   private immutable string[8] m_places = [
     t("Blood River"), t("Solace Bridge"), t("Highvale"), t("Brookside"),
     t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")
+  ];
+
+  private immutable string[8] m_placeLinks = [
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=310&amp;openPopup=true&amp;z=4",
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=2757&amp;openPopup=true&amp;z=4",
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=999&amp;openPopup=true&amp;z=4",
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=434&amp;openPopup=true&amp;z=4",
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=444&amp;openPopup=true&amp;z=4",
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=587&amp;openPopup=true&amp;z=4",
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=1054&amp;openPopup=true&amp;z=4",
+    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=632&amp;openPopup=true&amp;z=4"
   ];
 
   private immutable string[8] m_phases = [
@@ -261,7 +273,8 @@ class UIContext
         // The first item is the active lunar rift.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
         {
-          placeLabel.setText(format!("<b>%s</b>")(m_places[riftNum]));
+          placeLabel.setText(format!("<a href=\"%s\"><b>%s</b></a>")(m_placeLinks[riftNum],
+              m_places[riftNum]));
           placeLabel.setUseMarkup(true);
         }
 
@@ -275,7 +288,11 @@ class UIContext
       {
         // Draw the non-active lunar rifts in a less pronounced way.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
-          placeLabel.setText(m_places[riftNum]);
+        {
+          placeLabel.setText(format!("<a href=\"%s\">%s</a>")(m_placeLinks[riftNum],
+              m_places[riftNum]));
+          placeLabel.setUseMarkup(true);
+        }
 
         if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
         {
@@ -559,7 +576,6 @@ class UIContext
     {
       auto placeLabel = new Label("");
       placeLabel.setHalign(Align.START);
-      placeLabel.setUseMarkup(true);
       placeLabel.setMarginLeft(3);
       placeLabel.setMarginRight(3);
       placeLabel.setMarginTop(3);
@@ -567,7 +583,6 @@ class UIContext
       m_riftsgrid.attach(placeLabel, 0, index, 1, 1);
 
       auto phaseLabel = new Label("");
-      phaseLabel.setUseMarkup(true);
       phaseLabel.setHexpand(true);
       phaseLabel.setMarginLeft(3);
       phaseLabel.setMarginRight(3);
@@ -577,7 +592,6 @@ class UIContext
 
       auto riftLabel = new Label("");
       riftLabel.setHalign(Align.END);
-      riftLabel.setUseMarkup(true);
       riftLabel.setMarginLeft(3);
       riftLabel.setMarginRight(3);
       riftLabel.setMarginTop(3);
