@@ -9,6 +9,7 @@ private import gdk.Keysyms;
 private import gdk.RGBA;
 private import gdkpixbuf.Pixbuf;
 private import gdkpixbuf.PixbufLoader;
+private import glib.Timeout;
 private import gobject.Value;
 private import gtk.AboutDialog;
 private import gtk.AccelGroup;
@@ -82,6 +83,8 @@ class UIContext
   private Label[8] m_placeLabels;
   private Label[8] m_phaseLabels;
   private Label[8] m_riftLabels;
+
+  private Timeout m_riftTimer;
 
   private void setStatusMessage(int page, string message = [])
   {
@@ -241,6 +244,49 @@ class UIContext
 
     m_filterMenuItem.setSensitive(true);
     setStatusMessage(Page.stats, format(t("Showing stats for %s from %s"), avatar, date));
+  }
+
+  private void updateLunarRifts()
+  {
+    immutable auto phase = getLunarPhase();
+    int riftNum = cast(int) phase;
+    immutable double remain = 8.75 * (1.0 - (phase - riftNum));
+    int minutes = cast(int) remain;
+    int seconds = cast(int)(60.0 * (remain - minutes) + 0.5);
+
+    for (size_t counter; counter < 8; ++counter)
+    {
+      if (counter == 0)
+      {
+        m_placeLabels[riftNum].setText(format!("<b>%s</b>")(m_places[riftNum]));
+        m_phaseLabels[riftNum].setText(m_phases[riftNum]);
+        m_riftLabels[riftNum].setText(format!("Closes in %dm %ds")(minutes, seconds));
+
+        m_placeLabels[riftNum].setUseMarkup(true);
+      }
+      else
+      {
+        m_placeLabels[riftNum].setText(m_places[riftNum]);
+        m_phaseLabels[riftNum].setText(format("<span foreground='" ~ htmlColor(m_color,
+            0.5) ~ "'>%s</span>", m_phases[riftNum]));
+        m_riftLabels[riftNum].setText(format("<span foreground='" ~ htmlColor(m_color,
+            0.5) ~ "'>Opens in %dm %ds</span>", minutes, seconds));
+
+        m_phaseLabels[riftNum].setUseMarkup(true);
+        m_riftLabels[riftNum].setUseMarkup(true);
+
+        minutes += 8;
+        seconds += 45;
+        if (seconds >= 60)
+        {
+          ++minutes;
+          seconds -= 60;
+        }
+      }
+
+      if (++riftNum > 7)
+        riftNum = 0;
+    }
   }
 
   private void selectLogFolder()
@@ -494,7 +540,7 @@ class UIContext
     for (int index; index < cast(int) m_places.length; ++index)
     {
       m_placeLabels[index] = new Label(m_places[index]);
-      m_placeLabels[index].setHalign(Align.START);
+      m_placeLabels[index].setHalign(Align.END);
       m_placeLabels[index].setUseMarkup(true);
       m_placeLabels[index].setMarginLeft(3);
       m_placeLabels[index].setMarginRight(3);
@@ -514,6 +560,7 @@ class UIContext
 
       m_riftLabels[index] = new Label("<span foreground='" ~ htmlColor(m_color,
           0.5) ~ "'>Opens in 0m 0s</span>");
+      m_riftLabels[index].setHalign(Align.START);
       m_riftLabels[index].setUseMarkup(true);
       m_riftLabels[index].setMarginLeft(3);
       m_riftLabels[index].setMarginRight(3);
@@ -521,20 +568,36 @@ class UIContext
       m_riftLabels[index].setMarginBottom(3);
       riftsGrid.attach(m_riftLabels[index], 2, index, 1, 1);
     }
-    setStatusMessage(Page.rifts, t("Coming soon™"));
+
+    auto chronoLabel = new Label(
+        "The accuracy of this lunar rift chronometer\n" ~ "depends entirely on your system clock.\n\n"
+        ~ "For best results, please set your system clock\n" ~ "to synchronize with internet time.");
+    chronoLabel.setJustify(Justification.CENTER);
+
+    auto riftsBox = new Box(Orientation.VERTICAL, 10);
+    riftsBox.packStart(riftsGrid, false, true, 0);
+    riftsBox.packStart(chronoLabel, true, true, 0);
 
     auto notebook = new Notebook();
     notebook.insertPage(statsBox, new Label(t("Stats")), Page.stats);
-    notebook.insertPage(riftsGrid, new Label(t("Lunar Rifts")), Page.rifts);
+    notebook.insertPage(riftsBox, new Label(t("Lunar Rifts")), Page.rifts);
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
       if (pageNum != Page.stats)
       {
+        m_riftTimer = new Timeout(1000, () { updateLunarRifts(); return true; }, true);
+
         // Disable stat related view menu items if the stats page is not active.
         m_refreshMenuItem.setSensitive(false);
         m_filterMenuItem.setSensitive(false);
       }
       else
       {
+        if (m_riftTimer !is null)
+        {
+          m_riftTimer.stop();
+          m_riftTimer = null;
+        }
+
         // Restore stat related view menu items.
         m_refreshMenuItem.setSensitive(true);
 
