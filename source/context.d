@@ -273,8 +273,8 @@ class UIContext
         // The first item is the active lunar rift.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
         {
-          placeLabel.setText(format!("<a href=\"%s\"><b>%s</b></a>")(m_placeLinks[riftNum],
-              m_places[riftNum]));
+          placeLabel.setText(
+              "<a href=\"" ~ m_placeLinks[riftNum] ~ "\"><b>" ~ m_places[riftNum] ~ "</b></a>");
           placeLabel.setUseMarkup(true);
         }
 
@@ -282,29 +282,29 @@ class UIContext
           phaseLabel.setText(m_phases[riftNum]);
 
         if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
-          riftLabel.setText(format!("Closes in %02dm %02ds")(minutes, seconds));
+          riftLabel.setText(format(t("Closes in %02dm %02ds"), minutes, seconds));
       }
       else
       {
         // Draw the non-active lunar rifts in a less pronounced way.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
         {
-          placeLabel.setText(format!("<a href=\"%s\">%s</a>")(m_placeLinks[riftNum],
-              m_places[riftNum]));
+          placeLabel.setText("<a href=\"" ~ m_placeLinks[riftNum] ~ "\">"
+              ~ m_places[riftNum] ~ "</a>");
           placeLabel.setUseMarkup(true);
         }
 
         if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
         {
-          phaseLabel.setText(format("<span foreground='" ~ htmlColor(m_color,
-              0.5) ~ "'>%s</span>", m_phases[riftNum]));
+          phaseLabel.setText("<span foreground='" ~ htmlColor(m_color,
+              0.5) ~ "'>" ~ m_phases[riftNum] ~ "</span>");
           phaseLabel.setUseMarkup(true);
         }
 
         if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
         {
-          riftLabel.setText(format("<span foreground='" ~ htmlColor(m_color,
-              0.5) ~ "'>Opens in %02dm %02ds</span>", minutes, seconds));
+          riftLabel.setText("<span foreground='" ~ htmlColor(m_color,
+              0.5) ~ "'>" ~ format(t("Opens in %02dm %02ds"), minutes, seconds) ~ "</span>");
           riftLabel.setUseMarkup(true);
         }
 
