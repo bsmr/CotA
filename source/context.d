@@ -245,8 +245,11 @@ class UIContext
 
   private void updateLunarRifts()
   {
+    // Get the lunar phase.
     immutable auto phase = getLunarPhase();
     int riftNum = cast(int) phase;
+
+    // Get the time remaining for the active lunar rift.
     immutable double remain = 8.75 * (1.0 - (phase - riftNum));
     int minutes = cast(int) remain;
     int seconds = cast(int)(60.0 * (remain - minutes) + 0.5);
@@ -255,6 +258,7 @@ class UIContext
     {
       if (counter == 0)
       {
+        // The first item is the active lunar rift.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
         {
           placeLabel.setText(format!("<b>%s</b>")(m_places[riftNum]));
@@ -269,6 +273,7 @@ class UIContext
       }
       else
       {
+        // Draw the non-active lunar rifts in a less pronounced way.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
           placeLabel.setText(m_places[riftNum]);
 
@@ -286,6 +291,7 @@ class UIContext
           riftLabel.setUseMarkup(true);
         }
 
+        // Add time for the next lunar rift.
         minutes += 8;
         seconds += 45;
         if (seconds > 59)
@@ -548,6 +554,7 @@ class UIContext
     m_riftsgrid.setMarginTop(5);
     m_riftsgrid.setMarginBottom(5);
 
+    // Add the labels to the lunar rifts grid.
     for (int index; index < 8; ++index)
     {
       auto placeLabel = new Label("");
