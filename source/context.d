@@ -78,13 +78,10 @@ class UIContext
   private MenuItem m_filterMenuItem;
   private Button m_notesButton;
 
-  private string[int] m_statusMessages;
-
-  private Label[8] m_placeLabels;
-  private Label[8] m_phaseLabels;
-  private Label[8] m_riftLabels;
-
+  private Grid m_riftsgrid;
   private Timeout m_riftTimer;
+
+  private string[int] m_statusMessages;
 
   private void setStatusMessage(int page, string message = [])
   {
@@ -254,26 +251,40 @@ class UIContext
     int minutes = cast(int) remain;
     int seconds = cast(int)(60.0 * (remain - minutes) + 0.5);
 
-    for (size_t counter; counter < 8; ++counter)
+    for (int counter; counter < 8; ++counter)
     {
       if (counter == 0)
       {
-        m_placeLabels[riftNum].setText(format!("<b>%s</b>")(m_places[riftNum]));
-        m_phaseLabels[riftNum].setText(m_phases[riftNum]);
-        m_riftLabels[riftNum].setText(format!("Closes in %dm %ds")(minutes, seconds));
+        if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
+        {
+          placeLabel.setText(format!("<b>%s</b>")(m_places[riftNum]));
+          placeLabel.setUseMarkup(true);
+        }
 
-        m_placeLabels[riftNum].setUseMarkup(true);
+        if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
+          phaseLabel.setText(m_phases[riftNum]);
+
+        if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
+          riftLabel.setText(format!("Closes in %02dm %02ds")(minutes, seconds));
       }
       else
       {
-        m_placeLabels[riftNum].setText(m_places[riftNum]);
-        m_phaseLabels[riftNum].setText(format("<span foreground='" ~ htmlColor(m_color,
-            0.5) ~ "'>%s</span>", m_phases[riftNum]));
-        m_riftLabels[riftNum].setText(format("<span foreground='" ~ htmlColor(m_color,
-            0.5) ~ "'>Opens in %dm %ds</span>", minutes, seconds));
+        if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
+          placeLabel.setText(m_places[riftNum]);
 
-        m_phaseLabels[riftNum].setUseMarkup(true);
-        m_riftLabels[riftNum].setUseMarkup(true);
+        if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
+        {
+          phaseLabel.setText(format("<span foreground='" ~ htmlColor(m_color,
+              0.5) ~ "'>%s</span>", m_phases[riftNum]));
+          phaseLabel.setUseMarkup(true);
+        }
+
+        if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
+        {
+          riftLabel.setText(format("<span foreground='" ~ htmlColor(m_color,
+              0.5) ~ "'>Opens in %02dm %02ds</span>", minutes, seconds));
+          riftLabel.setUseMarkup(true);
+        }
 
         minutes += 8;
         seconds += 45;
@@ -432,6 +443,7 @@ class UIContext
     m_statsListStore = new ListStore([GType.STRING, GType.STRING]);
     m_avatarsComboBox = new ComboBoxText(false);
     m_datesComboBox = new ComboBoxText(false);
+    m_riftsgrid = new Grid();
     m_notesButton = new Button(t("Notes"), (Button) {
       modifyNotes(m_avatarsComboBox.getActiveText());
     });
@@ -531,42 +543,39 @@ class UIContext
     statsBox.packStart(toolBox, false, true, 0);
     statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
 
-    auto riftsGrid = new Grid();
-    riftsGrid.setMarginLeft(5);
-    riftsGrid.setMarginRight(5);
-    riftsGrid.setMarginTop(5);
-    riftsGrid.setMarginBottom(5);
+    m_riftsgrid.setMarginLeft(5);
+    m_riftsgrid.setMarginRight(5);
+    m_riftsgrid.setMarginTop(5);
+    m_riftsgrid.setMarginBottom(5);
 
-    for (int index; index < cast(int) m_places.length; ++index)
+    for (int index; index < 8; ++index)
     {
-      m_placeLabels[index] = new Label(m_places[index]);
-      m_placeLabels[index].setHalign(Align.END);
-      m_placeLabels[index].setUseMarkup(true);
-      m_placeLabels[index].setMarginLeft(3);
-      m_placeLabels[index].setMarginRight(3);
-      m_placeLabels[index].setMarginTop(3);
-      m_placeLabels[index].setMarginBottom(3);
-      riftsGrid.attach(m_placeLabels[index], 0, index, 1, 1);
+      auto placeLabel = new Label("");
+      placeLabel.setHalign(Align.END);
+      placeLabel.setUseMarkup(true);
+      placeLabel.setMarginLeft(3);
+      placeLabel.setMarginRight(3);
+      placeLabel.setMarginTop(3);
+      placeLabel.setMarginBottom(3);
+      m_riftsgrid.attach(placeLabel, 0, index, 1, 1);
 
-      m_phaseLabels[index] = new Label("<span foreground='" ~ htmlColor(m_color,
-          0.5) ~ "'>" ~ m_phases[index] ~ "</span>");
-      m_phaseLabels[index].setUseMarkup(true);
-      m_phaseLabels[index].setHexpand(true);
-      m_phaseLabels[index].setMarginLeft(3);
-      m_phaseLabels[index].setMarginRight(3);
-      m_phaseLabels[index].setMarginTop(3);
-      m_phaseLabels[index].setMarginBottom(3);
-      riftsGrid.attach(m_phaseLabels[index], 1, index, 1, 1);
+      auto phaseLabel = new Label("");
+      phaseLabel.setUseMarkup(true);
+      phaseLabel.setHexpand(true);
+      phaseLabel.setMarginLeft(3);
+      phaseLabel.setMarginRight(3);
+      phaseLabel.setMarginTop(3);
+      phaseLabel.setMarginBottom(3);
+      m_riftsgrid.attach(phaseLabel, 1, index, 1, 1);
 
-      m_riftLabels[index] = new Label("<span foreground='" ~ htmlColor(m_color,
-          0.5) ~ "'>Opens in 0m 0s</span>");
-      m_riftLabels[index].setHalign(Align.START);
-      m_riftLabels[index].setUseMarkup(true);
-      m_riftLabels[index].setMarginLeft(3);
-      m_riftLabels[index].setMarginRight(3);
-      m_riftLabels[index].setMarginTop(3);
-      m_riftLabels[index].setMarginBottom(3);
-      riftsGrid.attach(m_riftLabels[index], 2, index, 1, 1);
+      auto riftLabel = new Label("");
+      riftLabel.setHalign(Align.START);
+      riftLabel.setUseMarkup(true);
+      riftLabel.setMarginLeft(3);
+      riftLabel.setMarginRight(3);
+      riftLabel.setMarginTop(3);
+      riftLabel.setMarginBottom(3);
+      m_riftsgrid.attach(riftLabel, 2, index, 1, 1);
     }
 
     auto chronoLabel = new Label(
@@ -575,7 +584,7 @@ class UIContext
     chronoLabel.setJustify(Justification.CENTER);
 
     auto riftsBox = new Box(Orientation.VERTICAL, 10);
-    riftsBox.packStart(riftsGrid, false, true, 0);
+    riftsBox.packStart(m_riftsgrid, false, true, 0);
     riftsBox.packStart(chronoLabel, true, true, 0);
 
     auto notebook = new Notebook();
