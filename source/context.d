@@ -265,6 +265,11 @@ class UIContext
     immutable double remain = 8.75 * (1.0 - (phase - riftNum));
     int minutes = cast(int) remain;
     int seconds = cast(int)(60.0 * (remain - minutes) + 0.5);
+    if (seconds > 59)
+    {
+      ++minutes;
+      seconds -= 60;
+    }
 
     for (int counter; counter < 8; ++counter)
     {
@@ -612,15 +617,7 @@ class UIContext
     notebook.insertPage(statsBox, new Label(t("Stats")), Page.stats);
     notebook.insertPage(riftsBox, new Label(t("Lunar Rifts")), Page.rifts);
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
-      if (pageNum != Page.stats)
-      {
-        m_riftTimer = new Timeout(1000, () { updateLunarRifts(); return true; }, true);
-
-        // Disable stat related view menu items if the stats page is not active.
-        m_refreshMenuItem.setSensitive(false);
-        m_filterMenuItem.setSensitive(false);
-      }
-      else
+      if (pageNum == Page.stats)
       {
         if (m_riftTimer !is null)
         {
@@ -634,6 +631,14 @@ class UIContext
         TreeIter iter;
         if (m_statsListStore.getIterFirst(iter))
           m_filterMenuItem.setSensitive(true);
+      }
+      else
+      {
+        m_riftTimer = new Timeout(1000, () { updateLunarRifts(); return true; }, true);
+
+        // Disable stat related view menu items if the stats page is not active.
+        m_refreshMenuItem.setSensitive(false);
+        m_filterMenuItem.setSensitive(false);
       }
 
       setStatusMessage(pageNum);
