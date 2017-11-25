@@ -288,7 +288,7 @@ class UIContext
 
         minutes += 8;
         seconds += 45;
-        if (seconds >= 60)
+        if (seconds > 59)
         {
           ++minutes;
           seconds -= 60;
