@@ -61,14 +61,8 @@ double getLunarPhase()
   // Get the current UTC time.
   auto dateTime = cast(DateTime) Clock.currTime(UTC());
 
-  // Calculate the number of days since Tuesday.
-  int dayOffset = dateTime.dayOfWeek() - 2;
-  if (dayOffset < 0)
-    dayOffset += 7;
-
-  // Get the duration since midnight, Tuesday.
-  immutable auto duration = dateTime - DateTime(dateTime.year(),
-      dateTime.month(), dateTime.day() - dayOffset, 0, 0, 0);
+  // Get the duration since the lunar rift epoch.
+  immutable auto duration = dateTime - DateTime(1997, 9, 2, 0, 0, 0);
 
   // Calculate the lunar phase from the duration. Each phase is 525 seconds and
   // there are 8 phases, for a total of 4200 seconds per lunar cycle.
