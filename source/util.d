@@ -17,9 +17,9 @@ public string t(string text)
 /// Converts an RGBA color to text in HTML notation.
 string htmlColor(RGBA color, double opacity = 1.0)
 {
-  return format!("#%02x%02x%02x%02x")(cast(int)(color.red() * 255),
-      cast(int)(color.green() * 255), cast(int)(color.blue() * 255),
-      cast(int)(color.alpha() * clamp(opacity, 0.0, 1.0) * 255));
+  return format!("#%02x%02x%02x%02x")(cast(int)(color.red() * 255 + 0.5),
+      cast(int)(color.green() * 255 + 0.5), cast(int)(color.blue() * 255 + 0.5),
+      cast(int)(color.alpha() * clamp(opacity, 0.0, 1.0) * 255 + 0.5));
 }
 
 /// Translate a SotA logfile date string into a sortable format.
