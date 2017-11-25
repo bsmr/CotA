@@ -570,8 +570,8 @@ class UIContext
     }
 
     auto chronoLabel = new Label(
-        "The accuracy of this lunar rift chronometer\n" ~ "depends entirely on your system clock.\n\n"
-        ~ "For best results, please set your system clock\n" ~ "to synchronize with internet time.");
+        t("The accuracy of this lunar rift chronometer\n" ~ "depends entirely on your system clock.\n\n"
+        ~ "For best results, please set your system clock\n" ~ "to synchronize with internet time."));
     chronoLabel.setJustify(Justification.CENTER);
 
     auto riftsBox = new Box(Orientation.VERTICAL, 10);
