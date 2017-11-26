@@ -271,9 +271,9 @@ class UIContext
       seconds -= 60;
     }
 
-    for (int counter; counter < 8; ++counter)
+    for (int num; num < 8; ++num)
     {
-      if (counter == 0)
+      if (num == 0)
       {
         // The first item is the active lunar rift.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
