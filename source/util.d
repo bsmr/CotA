@@ -22,7 +22,7 @@ string htmlColor(RGBA color, double opacity = 1.0)
       cast(int)(color.alpha() * clamp(opacity, 0.0, 1.0) * 255 + 0.5));
 }
 
-/// Translate a SotA logfile date string into a sortable format.
+/// Convert a SotA logfile date string into a sortable format.
 public string dateSortable(string date)
 {
   // Split the string into the date, time and am/pm components.
