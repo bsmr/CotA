@@ -4,7 +4,7 @@
 		"Barugon"
 	],
 	"dependencies": {
-		"gtk-d": "~>3.7.1"
+		"gtk-d": "3.7.2"
 	},
 	"description": "Companion of the Avatar",
 	"license": "public domain",
