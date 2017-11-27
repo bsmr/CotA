@@ -84,7 +84,7 @@ class UIContext
   private ComboBoxText m_avatarsComboBox;
   private ComboBoxText m_datesComboBox;
   private ListStore m_statsListStore;
-  private RGBA m_color;
+  private RGBA m_textColor;
 
   private MenuItem m_refreshMenuItem;
   private MenuItem m_filterMenuItem;
@@ -225,11 +225,11 @@ class UIContext
     }
 
     string[3] colors;
-    if (m_color.alpha > 0.0)
+    if (m_textColor.alpha > 0.0)
     {
-      colors[0] = "<span foreground='" ~ htmlColor(m_color) ~ "'>%s</span>";
-      colors[1] = "<span foreground='" ~ htmlColor(m_color, 0.75) ~ "'>%s</span>";
-      colors[2] = "<span foreground='" ~ htmlColor(m_color, 0.5) ~ "'>%s</span>";
+      colors[0] = "<span foreground='" ~ htmlColor(m_textColor) ~ "'>%s</span>";
+      colors[1] = "<span foreground='" ~ htmlColor(m_textColor, 0.75) ~ "'>%s</span>";
+      colors[2] = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
     }
     else
     {
@@ -301,16 +301,26 @@ class UIContext
 
         if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
         {
-          phaseLabel.setText("<span foreground='" ~ htmlColor(m_color,
-              0.5) ~ "'>" ~ m_phases[riftNum] ~ "</span>");
-          phaseLabel.setUseMarkup(true);
+          if (m_textColor.alpha > 0.0)
+          {
+            phaseLabel.setText("<span foreground='" ~ htmlColor(m_textColor,
+                0.5) ~ "'>" ~ m_phases[riftNum] ~ "</span>");
+            phaseLabel.setUseMarkup(true);
+          }
+          else
+            phaseLabel.setText(m_phases[riftNum]);
         }
 
         if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
         {
-          riftLabel.setText("<span foreground='" ~ htmlColor(m_color,
-              0.5) ~ "'>" ~ format(t("Opens in %02dm %02ds"), minutes, seconds) ~ "</span>");
-          riftLabel.setUseMarkup(true);
+          if (m_textColor.alpha > 0.0)
+          {
+            riftLabel.setText("<span foreground='" ~ htmlColor(m_textColor,
+                0.5) ~ "'>" ~ format(t("Opens in %02dm %02ds"), minutes, seconds) ~ "</span>");
+            riftLabel.setUseMarkup(true);
+          }
+          else
+            riftLabel.setText(format(t("Opens in %02dm %02ds"), minutes, seconds));
         }
 
         // Add time for the next lunar rift.
@@ -478,8 +488,8 @@ class UIContext
 
     // Get the text color.
     auto styleContext = m_mainWindow.getStyleContext();
-    if (!styleContext.lookupColor("text_color", m_color))
-      styleContext.lookupColor("theme_text_color", m_color);
+    if (!styleContext.lookupColor("text_color", m_textColor))
+      styleContext.lookupColor("theme_text_color", m_textColor);
 
     // Load the winlow icon.
     auto pixbufLoader = new PixbufLoader();
