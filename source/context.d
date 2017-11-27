@@ -47,7 +47,7 @@ private import std.uri;
 /// UIContext is simply a container for the application's UI.
 class UIContext
 {
-  private enum versionString = "1.3.1";
+  private enum versionString = "2.0.0";
 
   private enum Page
   {
