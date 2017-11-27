@@ -224,18 +224,18 @@ class UIContext
         bins[2] ~= stat;
     }
 
-    string[3] colors;
+    string[3] markup;
     if (m_textColor.alpha > 0.0)
     {
-      colors[0] = "<span foreground='" ~ htmlColor(m_textColor) ~ "'>%s</span>";
-      colors[1] = "<span foreground='" ~ htmlColor(m_textColor, 0.75) ~ "'>%s</span>";
-      colors[2] = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
+      markup[0] = "<span foreground='" ~ htmlColor(m_textColor) ~ "'>%s</span>";
+      markup[1] = "<span foreground='" ~ htmlColor(m_textColor, 0.75) ~ "'>%s</span>";
+      markup[2] = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
     }
     else
     {
-      colors[0] = "%s";
-      colors[1] = "%s";
-      colors[2] = "%s";
+      markup[0] = "%s";
+      markup[1] = "%s";
+      markup[2] = "%s";
     }
 
     // Add the sorted stats to the tree view.
@@ -243,8 +243,8 @@ class UIContext
     {
       foreach (stat; bin)
       {
-        auto name = new Value(format(colors[binIndex], stat[0]));
-        auto value = new Value(format(colors[binIndex], stat[1]));
+        auto name = new Value(format(markup[binIndex], stat[0]));
+        auto value = new Value(format(markup[binIndex], stat[1]));
 
         TreeIter iter;
         m_statsListStore.insertWithValuesv(iter, -1, [0, 1], [name, value]);
@@ -271,6 +271,22 @@ class UIContext
       seconds -= 60;
     }
 
+    immutable string opensText = t("Opens in %02dm %02ds");
+    immutable string closesText = t("Closes in %02dm %02ds");
+
+    string phaseMarkup;
+    string riftMarkup;
+    if (m_textColor.alpha() > 0.0)
+    {
+      phaseMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
+      riftMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>" ~ opensText ~ "</span>";
+    }
+    else
+    {
+      phaseMarkup = "%s";
+      riftMarkup = opensText;
+    }
+
     for (int num; num < 8; ++num)
     {
       if (num == 0)
@@ -287,7 +303,7 @@ class UIContext
           phaseLabel.setText(m_phases[riftNum]);
 
         if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
-          riftLabel.setText(format(t("Closes in %02dm %02ds"), minutes, seconds));
+          riftLabel.setText(format(closesText, minutes, seconds));
       }
       else
       {
@@ -301,26 +317,14 @@ class UIContext
 
         if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
         {
-          if (m_textColor.alpha > 0.0)
-          {
-            phaseLabel.setText("<span foreground='" ~ htmlColor(m_textColor,
-                0.5) ~ "'>" ~ m_phases[riftNum] ~ "</span>");
-            phaseLabel.setUseMarkup(true);
-          }
-          else
-            phaseLabel.setText(m_phases[riftNum]);
+          phaseLabel.setText(format(phaseMarkup, m_phases[riftNum]));
+          phaseLabel.setUseMarkup(true);
         }
 
         if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
         {
-          if (m_textColor.alpha > 0.0)
-          {
-            riftLabel.setText("<span foreground='" ~ htmlColor(m_textColor,
-                0.5) ~ "'>" ~ format(t("Opens in %02dm %02ds"), minutes, seconds) ~ "</span>");
-            riftLabel.setUseMarkup(true);
-          }
-          else
-            riftLabel.setText(format(t("Opens in %02dm %02ds"), minutes, seconds));
+          riftLabel.setText(format(riftMarkup, minutes, seconds));
+          riftLabel.setUseMarkup(true);
         }
 
         // Add time for the next lunar rift.
@@ -453,6 +457,7 @@ class UIContext
     immutable int width = icon.getWidth();
     immutable int height = icon.getHeight();
 
+    // Create the logo with a 2px black border.
     auto logo = new Pixbuf(icon.getColorspace(), icon.getHasAlpha(),
         icon.getBitsPerSample(), width + logoBorderSize * 2, height + logoBorderSize * 2);
     logo.fill(0x000000FF);
@@ -481,8 +486,10 @@ class UIContext
     m_statsListStore = new ListStore([GType.STRING, GType.STRING]);
     m_avatarsComboBox = new ComboBoxText(false);
     m_datesComboBox = new ComboBoxText(false);
+    m_notesButton = new Button(t("Notes"));
     m_riftsgrid = new Grid();
-    m_notesButton = new Button(t("Notes"), (Button) {
+
+    m_notesButton.addOnClicked((Button) {
       modifyNotes(m_avatarsComboBox.getActiveText());
     });
 
@@ -616,7 +623,7 @@ class UIContext
 
     auto chronoLabel = new Label(
         t("The accuracy of this lunar rift chronometer\n" ~ "depends entirely on your system clock.\n\n"
-        ~ "For best results, please set your system clock\n" ~ "to synchronize with internet time."));
+        ~ "For best results, please set your system\n" ~ "clock to synchronize with internet time."));
     chronoLabel.setJustify(Justification.CENTER);
 
     auto riftsBox = new Box(Orientation.VERTICAL, 10);
@@ -644,7 +651,8 @@ class UIContext
       }
       else
       {
-        m_riftTimer = new Timeout(1000, () { updateLunarRifts(); return true; }, true);
+        if (pageNum == Page.rifts)
+          m_riftTimer = new Timeout(1000, () { updateLunarRifts(); return true; }, true);
 
         // Disable stat related view menu items if the stats page is not active.
         m_refreshMenuItem.setSensitive(false);
