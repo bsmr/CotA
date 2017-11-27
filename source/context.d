@@ -385,6 +385,7 @@ class UIContext
     auto textView = new TextView();
     textView.setVisible(true);
 
+    // Get previously stored notes.
     auto text = m_settings.getNotes(avatar);
     if (text.length > 0)
       textView.getBuffer().setText(text);
