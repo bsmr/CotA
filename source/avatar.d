@@ -92,6 +92,7 @@ public class AvatarLogData
     return names;
   }
 
+  /// Returns the dates that "/stats" was used for the specified avatar.
   string[] getStatDates(string avatar) const
   {
     if ((avatar.length == 0) || !isPathValid())
@@ -112,6 +113,7 @@ public class AvatarLogData
     return dates;
   }
 
+  /// Returns the stats, as name value pairs, for the specified avatar and date.
   string[2][] getStats(string avatar, string date) const
   {
     if ((avatar.length == 0) || (date.length == 0) || !isPathValid())
