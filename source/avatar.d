@@ -36,7 +36,12 @@ private string getText(const char[] line, string date, string search)
 /// Class to read stat entries from SotA chat logs.
 public class AvatarLogData
 {
-  private enum m_adventurerLevel = "AdventurerLevel: ";
+  private enum Strings
+  {
+    logNameStart = "SotAChatLog_",
+    adventurerLevel = "AdventurerLevel: "
+  }
+
   private string m_path;
 
   private bool isPathValid() const
@@ -46,7 +51,7 @@ public class AvatarLogData
 
   private auto getLogFileEntries(string avatar = []) const
   {
-    return dirEntries(m_path, "SotAChatLog_" ~ (avatar.length > 0
+    return dirEntries(m_path, Strings.logNameStart ~ (avatar.length > 0
         ? avatar.replace(" ", "_") : "*") ~ "_????-??-??.txt", SpanMode.shallow);
   }
 
@@ -62,18 +67,16 @@ public class AvatarLogData
     if (!isPathValid())
       return [];
 
-    enum startText = "SotAChatLog_";
     int[string] nameSet;
-
     foreach (fileName; getLogFileEntries())
     {
       string name = fileName.baseName();
       immutable auto pos = name.lastIndexOf('_');
-      if (!(pos > startText.length))
+      if (!(pos > Strings.logNameStart.length))
         continue;
 
       // Extract the avatar name.
-      name = name[startText.length .. pos];
+      name = name[Strings.logNameStart.length .. pos];
       if (name.length == 0)
         continue;
 
@@ -104,7 +107,7 @@ public class AvatarLogData
       // Search the log file for stat entries.
       foreach (line; File(fileName, "r").byLine())
       {
-        string date = getDate(line, m_adventurerLevel);
+        string date = getDate(line, Strings.adventurerLevel);
         if (date.length > 0)
           dates ~= date;
       }
@@ -125,7 +128,7 @@ public class AvatarLogData
       string stats;
       foreach (line; File(fileName, "r").byLine())
       {
-        stats = getText(line, date, m_adventurerLevel);
+        stats = getText(line, date, Strings.adventurerLevel);
         if (stats.length > 0)
           break;
       }
