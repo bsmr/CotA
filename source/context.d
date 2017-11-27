@@ -39,6 +39,7 @@ private import gtk.TreeIter;
 private import gtk.TreeView;
 private import gtk.TreeViewColumn;
 private import std.algorithm.sorting;
+private import std.conv;
 private import std.string;
 private import std.stdio;
 private import std.uri;
@@ -47,7 +48,7 @@ private import std.uri;
 /// UIContext is simply a container for the application's UI.
 class UIContext
 {
-  private enum versionString = "2.0.0";
+  private enum versionString = "2.0.1";
 
   private enum Page
   {
@@ -243,11 +244,14 @@ class UIContext
     {
       foreach (stat; bin)
       {
-        auto name = new Value(format(markup[binIndex], stat[0]));
-        auto value = new Value(format(markup[binIndex], stat[1]));
+        auto name = new Value(markup[binIndex].replace("%s", stat[0]));
+        auto value = new Value(markup[binIndex].replace("%s", stat[1]));
+        auto nameSort = new Value(stat[0]);
+        auto valueSort = new Value(to!(double)(stat[1]));
 
         TreeIter iter;
-        m_statsListStore.insertWithValuesv(iter, -1, [0, 1], [name, value]);
+        m_statsListStore.insertWithValuesv(iter, -1, [0, 1, 2, 3], [name,
+            value, nameSort, valueSort]);
       }
     }
 
@@ -484,7 +488,7 @@ class UIContext
     m_avatarLogData = new AvatarLogData(m_settings.getLogFolder());
     m_mainWindow = new MainWindow(t("Companion of the Avatar"));
     m_statusBar = new Statusbar();
-    m_statsListStore = new ListStore([GType.STRING, GType.STRING]);
+    m_statsListStore = new ListStore([GType.STRING, GType.STRING, GType.STRING, GType.DOUBLE]);
     m_avatarsComboBox = new ComboBoxText(false);
     m_datesComboBox = new ComboBoxText(false);
     m_notesButton = new Button(t("Notes"));
@@ -566,9 +570,11 @@ class UIContext
     menuBar.append(helpMenuItem);
 
     auto nameColumn = new TreeViewColumn(t("Name"), new CellRendererText(), "markup", 0);
+    nameColumn.setSortColumnId(2);
     nameColumn.setExpand(true);
 
     auto valueColumn = new TreeViewColumn(t("Value"), new CellRendererText(), "markup", 1);
+    valueColumn.setSortColumnId(3);
 
     auto statsTreeView = new TreeView();
     statsTreeView.appendColumn(nameColumn);
