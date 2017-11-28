@@ -47,7 +47,7 @@ public string dateSortable(string date)
 
   // Convert the hour, minute and second to integers and convert to 24 hour
   // format.
-  immutable auto hour = to!(int)(timeParts[0]) + (components[2].toUpper() == "PM" ? 12 : 0);
+  immutable auto hour = to!(int)(timeParts[0]) + (icmp(components[2], "PM") == 0 ? 12 : 0);
   immutable auto minute = to!(int)(timeParts[1]);
   immutable auto second = to!(int)(timeParts[2]);
 
