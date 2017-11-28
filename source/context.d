@@ -56,6 +56,9 @@ class UIContext
     rifts = 1
   }
 
+  private immutable string m_opensText = t("Opens in %02dm %02ds");
+  private immutable string m_closesText = t("Closes in %02dm %02ds");
+
   private immutable string[8] m_places = [
     t("Blood River"), t("Solace Bridge"), t("Highvale"), t("Brookside"),
     t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")
@@ -275,20 +278,18 @@ class UIContext
       seconds -= 60;
     }
 
-    immutable string opensText = t("Opens in %02dm %02ds");
-    immutable string closesText = t("Closes in %02dm %02ds");
-
     string phaseMarkup;
     string riftMarkup;
     if (m_textColor.alpha() > 0.0)
     {
       phaseMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
-      riftMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>" ~ opensText ~ "</span>";
+      riftMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>"
+        ~ m_opensText ~ "</span>";
     }
     else
     {
       phaseMarkup = "%s";
-      riftMarkup = opensText;
+      riftMarkup = m_opensText;
     }
 
     for (int num; num < 8; ++num)
@@ -307,7 +308,7 @@ class UIContext
           phaseLabel.setText(m_phases[riftNum]);
 
         if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
-          riftLabel.setText(format(closesText, minutes, seconds));
+          riftLabel.setText(format(m_closesText, minutes, seconds));
       }
       else
       {
