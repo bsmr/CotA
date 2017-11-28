@@ -9,6 +9,7 @@ cota.a
 cota.lib
 cota-test-*
 cota.json
+dub.selections.json
 *.exe
 *.o
 *.obj
