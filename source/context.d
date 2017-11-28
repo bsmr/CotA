@@ -321,7 +321,7 @@ class UIContext
 
         if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
         {
-          phaseLabel.setText(format(phaseMarkup, m_phases[riftNum]));
+          phaseLabel.setText(phaseMarkup.replace("%s", m_phases[riftNum]));
           phaseLabel.setUseMarkup(true);
         }
 
