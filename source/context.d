@@ -312,7 +312,7 @@ class UIContext
       }
       else
       {
-        // Draw the non-active lunar rifts in a less pronounced way.
+        // Draw the inactive lunar rifts in a less pronounced way.
         if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
         {
           placeLabel.setText("<a href=\"" ~ m_placeLinks[riftNum] ~ "\">"
