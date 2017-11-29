@@ -2,6 +2,7 @@ module util;
 
 // dfmt off
 private import gdk.RGBA;
+private import gtk.Widget;
 private import std.algorithm.comparison;
 private import std.conv;
 private import std.datetime;
@@ -12,6 +13,15 @@ private import std.string;
 public string t(string text)
 {
   return text;
+}
+
+/// Sets the left, top, right and bottom margins for a widget.
+void setMargins(Widget widget, int left, int top, int right, int bottom)
+{
+  widget.setMarginLeft(left);
+  widget.setMarginTop(top);
+  widget.setMarginRight(right);
+  widget.setMarginBottom(bottom);
 }
 
 /// Converts an RGBA color to text in HTML notation.
