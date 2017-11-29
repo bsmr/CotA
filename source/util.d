@@ -10,7 +10,7 @@ private import std.string;
 // dfmt on
 
 /// Localize a string (not implemented yet).
-public string t(string text)
+string t(string text)
 {
   return text;
 }
@@ -33,7 +33,7 @@ string htmlColor(RGBA color, double opacity = 1.0)
 }
 
 /// Convert a SotA logfile date string into a sortable format.
-public string dateSortable(string date)
+string dateSortable(string date)
 {
   // Split the string into the date, time and am/pm components.
   immutable auto components = date.split();
