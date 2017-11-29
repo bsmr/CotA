@@ -394,10 +394,7 @@ class UIContext
       textView.getBuffer().setText(text);
 
     auto contentArea = notesDialog.getContentArea();
-    contentArea.setMarginLeft(3);
-    contentArea.setMarginRight(3);
-    contentArea.setMarginTop(3);
-    contentArea.setMarginBottom(3);
+    contentArea.setMargins(3, 3, 3, 3);
     contentArea.setSpacing(3);
     contentArea.packStart(textView, true, true, 0);
 
@@ -430,10 +427,7 @@ class UIContext
     entry.setVisible(true);
 
     auto contentArea = filterDialog.getContentArea();
-    contentArea.setMarginLeft(3);
-    contentArea.setMarginRight(3);
-    contentArea.setMarginTop(3);
-    contentArea.setMarginBottom(3);
+    contentArea.setMargins(3, 3, 3, 3);
     contentArea.setSpacing(3);
     contentArea.packStart(entry, false, true, 0);
 
@@ -581,10 +575,7 @@ class UIContext
     statsTreeView.setModel(m_statsListStore);
 
     auto toolBox = new Box(Orientation.HORIZONTAL, 5);
-    toolBox.setMarginTop(3);
-    toolBox.setMarginBottom(3);
-    toolBox.setMarginLeft(5);
-    toolBox.setMarginRight(5);
+    toolBox.setMargins(5, 3, 5, 3);
     toolBox.packStart(new Label(t("Avatar:")), false, true, 0);
     toolBox.packStart(m_avatarsComboBox, false, true, 0);
     toolBox.packStart(m_datesComboBox, true, true, 0);
@@ -594,36 +585,24 @@ class UIContext
     statsBox.packStart(toolBox, false, true, 0);
     statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
 
-    m_riftsgrid.setMarginLeft(5);
-    m_riftsgrid.setMarginRight(5);
-    m_riftsgrid.setMarginTop(5);
-    m_riftsgrid.setMarginBottom(5);
+    m_riftsgrid.setMargins(5, 5, 5, 5);
 
     // Add the labels to the lunar rifts grid.
     for (int index; index < 8; ++index)
     {
       auto placeLabel = new Label("");
       placeLabel.setHalign(Align.START);
-      placeLabel.setMarginLeft(3);
-      placeLabel.setMarginRight(3);
-      placeLabel.setMarginTop(3);
-      placeLabel.setMarginBottom(3);
+      placeLabel.setMargins(3, 3, 3, 3);
       m_riftsgrid.attach(placeLabel, 0, index, 1, 1);
 
       auto phaseLabel = new Label("");
       phaseLabel.setHexpand(true);
-      phaseLabel.setMarginLeft(3);
-      phaseLabel.setMarginRight(3);
-      phaseLabel.setMarginTop(3);
-      phaseLabel.setMarginBottom(3);
+      phaseLabel.setMargins(3, 3, 3, 3);
       m_riftsgrid.attach(phaseLabel, 1, index, 1, 1);
 
       auto riftLabel = new Label("");
       riftLabel.setHalign(Align.END);
-      riftLabel.setMarginLeft(3);
-      riftLabel.setMarginRight(3);
-      riftLabel.setMarginTop(3);
-      riftLabel.setMarginBottom(3);
+      riftLabel.setMargins(3, 3, 3, 3);
       m_riftsgrid.attach(riftLabel, 2, index, 1, 1);
     }
 
