@@ -34,7 +34,7 @@ private string getText(const char[] line, string date, string search)
 }
 
 /// Class to read stat entries from SotA chat logs.
-public class AvatarLogData
+class AvatarLogData
 {
   private enum Strings
   {
