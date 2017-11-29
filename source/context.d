@@ -120,7 +120,6 @@ class UIContext
     m_avatarsComboBox.removeAll();
     m_datesComboBox.removeAll();
     m_statsListStore.clear();
-    m_refreshMenuItem.setSensitive(false);
     m_filterMenuItem.setSensitive(false);
     m_notesButton.setSensitive(false);
 
@@ -154,7 +153,6 @@ class UIContext
   {
     m_datesComboBox.removeAll();
     m_statsListStore.clear();
-    m_refreshMenuItem.setSensitive(true);
     m_filterMenuItem.setSensitive(false);
     m_notesButton.setSensitive(avatar.length > 0);
 
