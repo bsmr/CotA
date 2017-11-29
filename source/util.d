@@ -27,9 +27,9 @@ void setMargins(Widget widget, int left, int top, int right, int bottom)
 /// Converts an RGBA color to text in HTML notation.
 string htmlColor(RGBA color, double opacity = 1.0)
 {
-  return format!("#%02x%02x%02x%02x")(cast(int)(color.red() * 255 + 0.5),
-      cast(int)(color.green() * 255 + 0.5), cast(int)(color.blue() * 255 + 0.5),
-      cast(int)(color.alpha() * clamp(opacity, 0.0, 1.0) * 255 + 0.5));
+  return format!("#%02x%02x%02x%02x")(cast(int)(color.red * 255 + 0.5),
+      cast(int)(color.green * 255 + 0.5), cast(int)(color.blue * 255 + 0.5),
+      cast(int)(color.alpha * clamp(opacity, 0.0, 1.0) * 255 + 0.5));
 }
 
 /// Convert a SotA logfile date string into a sortable format.
