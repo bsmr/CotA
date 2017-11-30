@@ -86,14 +86,13 @@ class UIContext
     {
       if (auto val = page in m_statusMessages)
         message = *val;
-      else
-        message = "";
     }
     else
       m_statusMessages[page] = message;
 
     m_statusBar.removeAll(0);
-    m_statusBar.push(0, message);
+    if (message !is null)
+      m_statusBar.push(0, message);
   }
 
   private void populateAvatars(string defaultAvatar = [])
@@ -460,24 +459,19 @@ class UIContext
   {
     m_opensText = t("Opens in %02dm %02ds");
     m_closesText = t("Closes in %02dm %02ds");
-    m_places = [
-      t("Blood River"), t("Solace Bridge"), t("Highvale"), t("Brookside"),
-      t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")
-    ];
-    m_placeLinks = [
-      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=310&amp;openPopup=true&amp;z=4",
+    m_places = [t("Blood River"), t("Solace Bridge"), t("Highvale"),
+      t("Brookside"), t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")];
+    m_placeLinks = ["https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=310&amp;openPopup=true&amp;z=4",
       "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=2757&amp;openPopup=true&amp;z=4",
       "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=999&amp;openPopup=true&amp;z=4",
       "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=434&amp;openPopup=true&amp;z=4",
       "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=444&amp;openPopup=true&amp;z=4",
       "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=587&amp;openPopup=true&amp;z=4",
       "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=1054&amp;openPopup=true&amp;z=4",
-      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=632&amp;openPopup=true&amp;z=4"
-    ];
-    m_phases = [
-      t("New Moon"), t("Waxing Crescent"), t("First Quarter"), t("Waxing Gibbous"),
-      t("Full Moon"), t("Waning Gibbous"), t("Third Quarter"), t("Waning Crescent")
-    ];
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=632&amp;openPopup=true&amp;z=4"];
+    m_phases = [t("New Moon"), t("Waxing Crescent"), t("First Quarter"),
+      t("Waxing Gibbous"), t("Full Moon"), t("Waning Gibbous"),
+      t("Third Quarter"), t("Waning Crescent")];
 
     m_settings = new Settings(appPath);
     m_avatarLogData = new AvatarLogData(m_settings.getLogFolder());
