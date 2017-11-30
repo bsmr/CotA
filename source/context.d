@@ -327,7 +327,7 @@ class UIContext
 
   private void selectLogFolder()
   {
-    auto folderDialog = new FileChooserDialog(t("Select SotA log folder..."),
+    auto folderDialog = new FileChooserDialog(t("Select SotA Log Folder"),
         m_mainWindow, FileChooserAction.SELECT_FOLDER);
     folderDialog.setFilename(m_settings.getLogFolder());
 
