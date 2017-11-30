@@ -56,30 +56,11 @@ class UIContext
     rifts = 1
   }
 
-  private immutable string m_opensText = t("Opens in %02dm %02ds");
-  private immutable string m_closesText = t("Closes in %02dm %02ds");
-
-  private immutable string[8] m_places = [
-    t("Blood River"), t("Solace Bridge"), t("Highvale"), t("Brookside"),
-    t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")
-  ];
-
-  private immutable string[8] m_placeLinks = [
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=310&amp;openPopup=true&amp;z=4",
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=2757&amp;openPopup=true&amp;z=4",
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=999&amp;openPopup=true&amp;z=4",
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=434&amp;openPopup=true&amp;z=4",
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=444&amp;openPopup=true&amp;z=4",
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=587&amp;openPopup=true&amp;z=4",
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=1054&amp;openPopup=true&amp;z=4",
-    "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=632&amp;openPopup=true&amp;z=4"
-  ];
-
-  private immutable string[8] m_phases = [
-    t("New Moon"), t("Waxing Crescent"), t("First Quarter"),
-    t("Waxing Gibbous"), t("Full Moon"), t("Waning Gibbous"),
-    t("Third Quarter"), t("Waning Crescent")
-  ];
+  private immutable string m_opensText;
+  private immutable string m_closesText;
+  private immutable string[8] m_places;
+  private immutable string[8] m_placeLinks;
+  private immutable string[8] m_phases;
 
   private AvatarLogData m_avatarLogData;
   private Settings m_settings;
@@ -477,6 +458,27 @@ class UIContext
   /// Construction initializes the UI.
   this(string appPath)
   {
+    m_opensText = t("Opens in %02dm %02ds");
+    m_closesText = t("Closes in %02dm %02ds");
+    m_places = [
+      t("Blood River"), t("Solace Bridge"), t("Highvale"), t("Brookside"),
+      t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")
+    ];
+    m_placeLinks = [
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=310&amp;openPopup=true&amp;z=4",
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=2757&amp;openPopup=true&amp;z=4",
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=999&amp;openPopup=true&amp;z=4",
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=434&amp;openPopup=true&amp;z=4",
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=444&amp;openPopup=true&amp;z=4",
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=587&amp;openPopup=true&amp;z=4",
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=1054&amp;openPopup=true&amp;z=4",
+      "https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=632&amp;openPopup=true&amp;z=4"
+    ];
+    m_phases = [
+      t("New Moon"), t("Waxing Crescent"), t("First Quarter"), t("Waxing Gibbous"),
+      t("Full Moon"), t("Waning Gibbous"), t("Third Quarter"), t("Waning Crescent")
+    ];
+
     m_settings = new Settings(appPath);
     m_avatarLogData = new AvatarLogData(m_settings.getLogFolder());
     m_mainWindow = new MainWindow(t("Companion of the Avatar"));
