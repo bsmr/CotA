@@ -10,7 +10,7 @@ private import std.datetime;
 private import std.string;
 // dfmt on
 
-/// Localize a string (not implemented yet).
+/// Localize a string.
 string t(string text)
 {
   return Internationalization.dgettext([], text);
