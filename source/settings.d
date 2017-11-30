@@ -54,8 +54,6 @@ class Settings
     {
       version (Windows)
         logFolder = Util.getHomeDir() ~ "/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs";
-      else version (OSX)
-        logFolder = Util.getHomeDir() ~ "/.config/Portalarium/Shroud of the Avatar/ChatLogs";
       else
         logFolder = Util.getHomeDir() ~ "/.config/Portalarium/Shroud of the Avatar/ChatLogs";
     }
