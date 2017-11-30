@@ -52,17 +52,17 @@ class Settings
 
     if (logFolder.length == 0)
     {
-      version (linux)
-      {
-        logFolder = Util.getHomeDir() ~ "/.config/Portalarium/Shroud of the Avatar/ChatLogs";
-      }
-      version (OSX)
-      {
-        logFolder = Util.getHomeDir() ~ "/.config/Portalarium/Shroud of the Avatar/ChatLogs";
-      }
       version (Windows)
       {
         logFolder = Util.getHomeDir() ~ "/AppData/Roaming/Portalarium/Shroud of the Avatar/ChatLogs";
+      }
+      else version (OSX)
+      {
+        logFolder = Util.getHomeDir() ~ "/.config/Portalarium/Shroud of the Avatar/ChatLogs";
+      }
+      else
+      {
+        logFolder = Util.getHomeDir() ~ "/.config/Portalarium/Shroud of the Avatar/ChatLogs";
       }
     }
 
