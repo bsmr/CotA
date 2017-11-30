@@ -2,6 +2,7 @@ module util;
 
 // dfmt off
 private import gdk.RGBA;
+private import glib.Internationalization;
 private import gtk.Widget;
 private import std.algorithm.comparison;
 private import std.conv;
@@ -12,7 +13,7 @@ private import std.string;
 /// Localize a string (not implemented yet).
 string t(string text)
 {
-  return text;
+  return Internationalization.dgettext([], text);
 }
 
 /// Sets the left, top, right and bottom margins for a widget.
