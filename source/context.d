@@ -186,10 +186,10 @@ class UIContext
       bool searched;
       if (filter.length > 0)
       {
-        if (stat[0].indexOf(filter, CaseSensitive.no) >= 0)
-          searched = true;
-        else
+        if (stat[0].indexOf(filter, CaseSensitive.no) < 0)
           continue;
+
+        searched = true;
       }
 
       // Check if the stat is in the order associative array.
@@ -331,22 +331,14 @@ class UIContext
         m_mainWindow, FileChooserAction.SELECT_FOLDER);
     folderDialog.setFilename(m_settings.getLogFolder());
 
-    switch (folderDialog.run())
+    if (folderDialog.run() == ResponseType.OK)
     {
-    case ResponseType.OK:
+      const string folder = folderDialog.getFilename();
+      if (m_settings.setLogFolder(folder))
       {
-        const string folder = folderDialog.getFilename();
-        if (m_settings.setLogFolder(folder))
-        {
-          m_avatarLogData = new AvatarLogData(folder);
-          populateAvatars(m_avatarsComboBox.getActiveText());
-        }
+        m_avatarLogData = new AvatarLogData(folder);
+        populateAvatars(m_avatarsComboBox.getActiveText());
       }
-
-      break;
-
-    default:
-      break;
     }
 
     folderDialog.close();
@@ -379,15 +371,8 @@ class UIContext
     contentArea.packStart(textView, true, true, 0);
 
     // Run the dialog and get the result.
-    switch (notesDialog.run())
-    {
-    case ResponseType.OK:
+    if (notesDialog.run() == ResponseType.OK)
       m_settings.setNotes(avatar, textView.getBuffer().getText());
-      break;
-
-    default:
-      break;
-    }
 
     notesDialog.close();
   }
@@ -413,15 +398,8 @@ class UIContext
 
     // Run the dialog and get the result.
     string filterText;
-    switch (filterDialog.run())
-    {
-    case ResponseType.OK:
+    if (filterDialog.run() == ResponseType.OK)
       filterText = entry.getText();
-      break;
-
-    default:
-      break;
-    }
 
     filterDialog.close();
     return filterText;
