@@ -61,6 +61,7 @@ class UIContext
   private immutable string[8] m_places;
   private immutable string[8] m_placeLinks;
   private immutable string[8] m_phases;
+  private immutable int[string] m_statOrder;
 
   private AvatarLogData m_avatarLogData;
   private Settings m_settings;
@@ -173,11 +174,6 @@ class UIContext
       return;
     }
 
-    immutable int[string] order = [
-      "VirtueCourage" : -1, "VirtueLove" : -1, "VirtueTruth" : -1,
-      "AdventurerLevel" : 0, "ProducerLevel" : 1
-    ];
-
     // Sort the stats according to the order value.
     string[2][][3] bins;
     foreach (stat; stats)
@@ -193,7 +189,7 @@ class UIContext
       }
 
       // Check if the stat is in the order associative array.
-      if (auto val = stat[0] in order)
+      if (auto val = stat[0] in m_statOrder)
       {
         // Don't add items with a negative order value unless it's specifically
         // searched for.
@@ -450,6 +446,10 @@ class UIContext
     m_phases = [t("New Moon"), t("Waxing Crescent"), t("First Quarter"),
       t("Waxing Gibbous"), t("Full Moon"), t("Waning Gibbous"),
       t("Third Quarter"), t("Waning Crescent")];
+    m_statOrder = [
+      "VirtueCourage" : -1, "VirtueLove" : -1, "VirtueTruth" : -1,
+      "AdventurerLevel" : 0, "ProducerLevel" : 1
+    ];
 
     m_settings = new Settings(appPath);
     m_avatarLogData = new AvatarLogData(m_settings.getLogFolder());
