@@ -446,10 +446,8 @@ class UIContext
     m_phases = [t("New Moon"), t("Waxing Crescent"), t("First Quarter"),
       t("Waxing Gibbous"), t("Full Moon"), t("Waning Gibbous"),
       t("Third Quarter"), t("Waning Crescent")];
-    m_statOrder = [
-      "VirtueCourage" : -1, "VirtueLove" : -1, "VirtueTruth" : -1,
-      "AdventurerLevel" : 0, "ProducerLevel" : 1
-    ];
+    m_statOrder = ["VirtueCourage" : -1, "VirtueLove" : -1, "VirtueTruth" : -1,
+      "AdventurerLevel" : 0, "ProducerLevel" : 1];
 
     m_settings = new Settings(appPath);
     m_avatarLogData = new AvatarLogData(m_settings.getLogFolder());
