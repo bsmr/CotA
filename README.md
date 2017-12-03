@@ -3,7 +3,7 @@ CotA is a small application to nicely display the stats ("/stats") recorded to a
 
 ![screenshot](http://a4.pbase.com/o10/09/605909/1/164136608.HlZbUjYn.Screenshotfrom20171123164324.png)
 
-It also has this sweet Lunar Rift chronometer.
+It also has this sweet lunar rift chronometer.
 
 ![screenshot](http://a4.pbase.com/o10/09/605909/1/166622004.JBLHOjc8.Screenshotfrom20171124194648.png)
 
@@ -16,5 +16,6 @@ To build on Windows or Mac, You will need to:
 - Install DMD (https://dlang.org/download.html).
 - Clone the source code from this repository or download a zip archive and extract it.
 - From the command line, change to the CotA folder and enter "dub build".
+
 
 This code is released as public domain. Do with it as you want but I am not liable for any of it.
