@@ -6,7 +6,9 @@ private import std.file;
 private import std.json;
 // dfmt on
 
-/// Simple application settings object.
+/**
+ * Simple application settings object.
+ */
 class Settings
 {
   private enum Keys
@@ -28,7 +30,9 @@ class Settings
     return true;
   }
 
-  /// Construction.
+  /**
+   * Construction.
+   */
   this(string appPath)
   {
     m_filePath = appPath ~ ".json";
@@ -71,7 +75,9 @@ class Settings
     return store();
   }
 
-  /// Gets the current avatar name.
+  /**
+   * Gets the current avatar name.
+   */
   string getAvatar() const
   {
     if (m_json.type == JSON_TYPE.OBJECT)
@@ -83,7 +89,9 @@ class Settings
     return [];
   }
 
-  /// Sets the current avatar name.
+  /**
+   * Sets the current avatar name.
+   */
   bool setAvatar(string avatar)
   {
     if (avatar == getAvatar())
@@ -93,7 +101,9 @@ class Settings
     return store();
   }
 
-  /// Get the notes for the specified avatar.
+  /**
+   * Get the notes for the specified avatar.
+   */
   string getNotes(string avatar) const
   {
     if ((avatar.length > 0) && (m_json.type == JSON_TYPE.OBJECT))
@@ -105,7 +115,9 @@ class Settings
     return [];
   }
 
-  /// Set the notes for the specified avatar.
+  /**
+   * Set the notes for the specified avatar.
+   */
   bool setNotes(string avatar, string notes)
   {
     if ((avatar.length == 0) || (notes == getNotes(avatar)))

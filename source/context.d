@@ -45,7 +45,9 @@ private import std.stdio;
 private import std.uri;
 // dfmt on
 
-/// UIContext is simply a container for the application's UI.
+/**
+ * UIContext is simply a container for the application's UI.
+ */
 class UIContext
 {
   private enum versionString = "2.0.1";
@@ -428,7 +430,9 @@ class UIContext
     aboutDialog.close();
   }
 
-  /// Construction initializes the UI.
+  /**
+   * Construction initializes the UI.
+   */
   this(string appPath)
   {
     m_opensText = t("Opens in %02dm %02ds");
@@ -638,7 +642,9 @@ class UIContext
     populateAvatars(m_settings.getAvatar());
   }
 
-  /// Show the main window.
+  /**
+   * Show the main window.
+   */
   void show()
   {
     m_mainWindow.showAll();

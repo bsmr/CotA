@@ -33,7 +33,9 @@ private string getText(const char[] line, string date, string search)
   return [];
 }
 
-/// Class to read stat entries from SotA chat logs.
+/**
+ * Class to read stat entries from SotA chat logs.
+ */
 class AvatarLogData
 {
   private enum Strings
@@ -55,13 +57,17 @@ class AvatarLogData
         ? avatar.replace(" ", "_") : "*") ~ "_????-??-??.txt", SpanMode.shallow);
   }
 
-  /// Constructor.
+  /**
+   * Constructor.
+   */
   this(string path)
   {
     m_path = path;
   }
 
-  /// Returns a list of avatar names.
+  /**
+   * Returns a list of avatar names.
+   */
   string[] getAvatars() const
   {
     if (!isPathValid())
@@ -95,7 +101,9 @@ class AvatarLogData
     return names;
   }
 
-  /// Returns the dates that "/stats" was used for the specified avatar.
+  /**
+   * Returns the dates that "/stats" was used for the specified avatar.
+   */
   string[] getStatDates(string avatar) const
   {
     if ((avatar.length == 0) || !isPathValid())
@@ -116,7 +124,9 @@ class AvatarLogData
     return dates;
   }
 
-  /// Returns the stats, as name value pairs, for the specified avatar and date.
+  /**
+   * Returns the stats, as name value pairs, for the specified avatar and date.
+   */
   string[2][] getStats(string avatar, string date) const
   {
     if ((avatar.length == 0) || (date.length == 0) || !isPathValid())

@@ -10,13 +10,17 @@ private import std.datetime;
 private import std.string;
 // dfmt on
 
-/// Localize a string.
+/**
+ * Localize a string.
+ */
 string t(string text)
 {
   return Internationalization.dgettext([], text);
 }
 
-/// Sets the left, top, right and bottom margins for a widget.
+/**
+ * Sets the left, top, right and bottom margins for a widget.
+ */
 void setMargins(Widget widget, int left, int top, int right, int bottom)
 {
   widget.setMarginLeft(left);
@@ -25,7 +29,9 @@ void setMargins(Widget widget, int left, int top, int right, int bottom)
   widget.setMarginBottom(bottom);
 }
 
-/// Converts an RGBA color to text in HTML notation.
+/**
+ * Converts an RGBA color to text in HTML notation.
+ */
 string htmlColor(RGBA color, double opacity = 1.0)
 {
   return format!("#%02x%02x%02x%02x")(cast(int)(color.red * 255 + 0.5),
@@ -33,7 +39,9 @@ string htmlColor(RGBA color, double opacity = 1.0)
       cast(int)(color.alpha * clamp(opacity, 0.0, 1.0) * 255 + 0.5));
 }
 
-/// Convert a SotA logfile date string into a sortable format.
+/**
+ * Convert a SotA logfile date string into a sortable format.
+ */
 string dateSortable(string date)
 {
   // Split the string into the date, time and am/pm components.
@@ -66,7 +74,9 @@ string dateSortable(string date)
   return format!("%04d%02d%02d%02d%02d%02d")(year, month, day, hour, minute, second);
 }
 
-/// Returns the current lunar phase as a double.
+/**
+ * Returns the current lunar phase as a double.
+ */
 double getLunarPhase()
 {
   // Get the current UTC time.
