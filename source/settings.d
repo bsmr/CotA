@@ -44,7 +44,9 @@ class Settings
     }
   }
 
-  // Gets the log folder path.
+  /**
+   * Gets the log folder path.
+   */
   string getLogFolder() const
   {
     string logFolder;
@@ -65,7 +67,9 @@ class Settings
     return logFolder;
   }
 
-  // Sets the log folder path.
+  /**
+   * Sets the log folder path.
+   */
   bool setLogFolder(string logFolder)
   {
     if (logFolder == getLogFolder())
