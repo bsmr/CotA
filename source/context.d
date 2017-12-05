@@ -453,7 +453,17 @@ class UIContext
 
     m_settings = new Settings(appPath);
     m_avatarLogData = new AvatarLogData(m_settings.getLogFolder());
+
     m_mainWindow = new MainWindow(t("Companion of the Avatar"));
+    m_mainWindow.addOnDelete((Event, Widget) {
+      if (m_riftTimer !is null)
+      {
+        m_riftTimer.stop();
+        m_riftTimer = null;
+      }
+
+      return false;
+    });
 
     // Get the text color.
     auto styleContext = m_mainWindow.getStyleContext();
