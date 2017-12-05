@@ -487,12 +487,11 @@ class UIContext
     fileMenuItem.setSubmenu(fileMenu);
 
     m_avatarsComboBox = new ComboBoxText(false);
+    m_datesComboBox = new ComboBoxText(false);
 
     m_notesButton = new Button(t("Notes"), (Button) {
       modifyNotes(m_avatarsComboBox.getActiveText());
     });
-
-    m_datesComboBox = new ComboBoxText(false);
 
     // Refresh menu item.
     m_refreshMenuItem = new MenuItem((MenuItem) {
