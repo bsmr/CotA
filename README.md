@@ -13,7 +13,7 @@ The application will create a json file next to itself in order to persist setti
 
 To build on Windows or Mac, You will need to:
 - Install the 64-bit GTK+ libraries (https://www.gtk.org/download/index.php).
-- Install DMD (https://dlang.org/download.html). On Windows, be sure to say yes when asked to install Visual Studio Community Edition.
+- Install DMD (https://dlang.org/download.html). On Windows, be sure to say yes if asked to install Visual Studio Community Edition.
 - Clone the source code from this repository or download a zip archive and extract it.
 - From the command line (use "D2 64-bit Command Prompt" on Windows), change to the CotA folder and enter: ```dub build --config=application --arch=x86_64 --build=release```
 
