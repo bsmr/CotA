@@ -15,7 +15,7 @@ To build on Windows or Mac, You will need to:
 - Install the GTK+ libraries (https://www.gtk.org/download/index.php).
 - Install DMD (https://dlang.org/download.html).
 - Clone the source code from this repository or download a zip archive and extract it.
-- From the command line, change to the CotA folder and enter: ```dub build --config=application --arch=x86_64 --build=release```
+- From the command line (use "D2 64-bit Command Prompt" on Windows), change to the CotA folder and enter: ```dub build --config=application --arch=x86_64 --build=release```
 
 It may take a long time to build the gtk-d libraries.
 
