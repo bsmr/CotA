@@ -65,6 +65,8 @@ class UIContext
   private immutable string[8] m_phases;
   private immutable int[string] m_statOrder;
 
+  private string[int] m_statusMessages;
+
   private AvatarLogData m_avatarLogData;
   private Settings m_settings;
   private MainWindow m_mainWindow;
@@ -72,16 +74,12 @@ class UIContext
   private ComboBoxText m_avatarsComboBox;
   private ComboBoxText m_datesComboBox;
   private ListStore m_statsListStore;
-  private RGBA m_textColor;
-
   private MenuItem m_refreshMenuItem;
   private MenuItem m_filterMenuItem;
   private Button m_notesButton;
-
   private Grid m_riftsgrid;
   private Timeout m_riftTimer;
-
-  private string[int] m_statusMessages;
+  private RGBA m_textColor;
 
   private void setStatusMessage(int page, string message = [])
   {
@@ -456,16 +454,6 @@ class UIContext
     m_settings = new Settings(appPath);
     m_avatarLogData = new AvatarLogData(m_settings.getLogFolder());
     m_mainWindow = new MainWindow(t("Companion of the Avatar"));
-    m_statusBar = new Statusbar();
-    m_statsListStore = new ListStore([GType.STRING, GType.STRING, GType.STRING, GType.DOUBLE]);
-    m_avatarsComboBox = new ComboBoxText(false);
-    m_datesComboBox = new ComboBoxText(false);
-    m_notesButton = new Button(t("Notes"));
-    m_riftsgrid = new Grid();
-
-    m_notesButton.addOnClicked((Button) {
-      modifyNotes(m_avatarsComboBox.getActiveText());
-    });
 
     // Get the text color.
     auto styleContext = m_mainWindow.getStyleContext();
@@ -497,6 +485,13 @@ class UIContext
 
     auto fileMenuItem = new MenuItem(t("_File"));
     fileMenuItem.setSubmenu(fileMenu);
+
+    m_avatarsComboBox = new ComboBoxText(false);
+    m_datesComboBox = new ComboBoxText(false);
+
+    m_notesButton = new Button(t("Notes"), (Button) {
+      modifyNotes(m_avatarsComboBox.getActiveText());
+    });
 
     // Refresh menu item.
     m_refreshMenuItem = new MenuItem((MenuItem) {
@@ -545,6 +540,8 @@ class UIContext
     auto valueColumn = new TreeViewColumn(t("Value"), new CellRendererText(), "markup", 1);
     valueColumn.setSortColumnId(3);
 
+    m_statsListStore = new ListStore([GType.STRING, GType.STRING, GType.STRING, GType.DOUBLE]);
+
     auto statsTreeView = new TreeView();
     statsTreeView.appendColumn(nameColumn);
     statsTreeView.appendColumn(valueColumn);
@@ -561,6 +558,7 @@ class UIContext
     statsBox.packStart(toolBox, false, true, 0);
     statsBox.packStart(new ScrolledWindow(statsTreeView), true, true, 0);
 
+    m_riftsgrid = new Grid();
     m_riftsgrid.setMargins(5, 5, 5, 5);
 
     // Add the labels to the lunar rifts grid.
@@ -622,6 +620,8 @@ class UIContext
 
       setStatusMessage(pageNum);
     });
+
+    m_statusBar = new Statusbar();
 
     auto mainBox = new Box(Orientation.VERTICAL, 0);
     mainBox.packStart(menuBar, false, false, 0);
