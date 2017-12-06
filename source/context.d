@@ -456,6 +456,7 @@ class UIContext
 
     m_mainWindow = new MainWindow(t("Companion of the Avatar"));
     m_mainWindow.addOnDelete((Event, Widget) {
+      // Make sure that the rift timer is stopped when the window is closed.
       if (m_riftTimer !is null)
       {
         m_riftTimer.stop();
