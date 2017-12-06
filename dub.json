@@ -10,5 +10,9 @@
 	"license": "public domain",
   "dflags": [
     "-J."
+  ],
+  "lflags-windows" : [
+    "/SUBSYSTEM:windows,6.00",
+     "/ENTRY:mainCRTStartup"
   ]
 }
