@@ -13,12 +13,13 @@ The application will create a json file next to itself in order to persist setti
 
 To build on Windows or Mac, You will need to:
 - Install the 64-bit GTK+ libraries (https://www.gtk.org/download/index.php).
-- Install DMD (https://dlang.org/download.html). On Windows, be sure to say yes if asked to install Visual Studio Community Edition.
+- Install DMD (https://dlang.org/download.html). On Windows, be sure to say yes if asks to install Visual Studio Community Edition.
 - Clone the source code from this repository or download a zip archive and extract it.
-- From the command line (use "D2 64-bit Command Prompt" on Windows), change to the CotA folder and enter: ```dub build --config=application --arch=x86_64```
+- From the command line (use "D2 64-bit Command Prompt" on Windows), change to the CotA folder and enter: ```dub build --arch=x86_64```
 
 It may take a long time to build the gtk-d libraries.
 
-NOTE: On Windows, the GTK+ installer doesn't seem to add the location of the DLLs to PATH. You will need to do this manually. In Windows 10, click on "Search Windows" in the task bar, start typing "environment" then click on "Edit the system environment variables". From there, click the "Environment Variables" button and then add the path of the GTK+ DLLs (probably ```C:\msys64\mingw64\bin```) to "Path" in "System variables".  
-
+NOTE: On Windows, the GTK+ installer doesn't seem to add the location of the DLLs to the PATH environment variable. You will need to do this manually. In Windows 10, click on "Search Windows" in the task bar, start typing "environment" then click on "Edit the system environment variables". From there, click the "Environment Variables" button and then add the path of the GTK+ DLLs (probably ```C:\msys64\mingw64\bin```) to "Path" in "System variables". 
+  
+  
 This code is released as public domain. Do with it as you want but I am not liable for any of it.
