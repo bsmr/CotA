@@ -117,9 +117,7 @@ class UIContext
 
     // Add the avatars to the combo box.
     foreach (avatar; avatars)
-    {
       m_avatarsComboBox.appendText(avatar);
-    }
 
     // Attempt to select the default avatar.
     if (defaultAvatar.length > 0)
@@ -155,9 +153,7 @@ class UIContext
 
     // Add the dates to the combo box.
     foreach (date; dates)
-    {
       m_datesComboBox.appendText(date);
-    }
 
     m_datesComboBox.setActive(0);
   }
