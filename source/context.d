@@ -171,21 +171,21 @@ class UIContext
     }
 
     // Sort the stats according to the order value.
-    string[2][][3] bins;
+    AvatarLogData.Stat[][3] bins;
     foreach (stat; stats)
     {
       // Check if the stat is being filtered.
       bool searched;
       if (filter.length > 0)
       {
-        if (stat[0].indexOf(filter, CaseSensitive.no) < 0)
+        if (stat.name.indexOf(filter, CaseSensitive.no) < 0)
           continue;
 
         searched = true;
       }
 
       // Check if the stat is in the order associative array.
-      if (auto val = stat[0] in m_statOrder)
+      if (auto val = stat.name in m_statOrder)
       {
         // Don't add items with a negative order value unless it's specifically
         // searched for.
@@ -217,10 +217,10 @@ class UIContext
     {
       foreach (stat; bin)
       {
-        auto name = new Value(markup[binIndex].replace("%s", stat[0]));
-        auto value = new Value(markup[binIndex].replace("%s", stat[1]));
-        auto nameSort = new Value(stat[0]);
-        auto valueSort = new Value(to!(double)(stat[1]));
+        auto name = new Value(markup[binIndex].replace("%s", stat.name));
+        auto value = new Value(markup[binIndex].replace("%s", stat.value));
+        auto nameSort = new Value(stat.name);
+        auto valueSort = new Value(to!(double)(stat.value));
 
         TreeIter iter;
         m_statsListStore.insertWithValuesv(iter, -1, [0, 1, 2, 3], [name,

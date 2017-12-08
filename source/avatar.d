@@ -5,6 +5,7 @@ private import std.file;
 private import std.path;
 private import std.stdio;
 private import std.string;
+private import std.typecons;
 // dfmt on
 
 private string getDate(const char[] line, string search)
@@ -125,9 +126,14 @@ class AvatarLogData
   }
 
   /**
-   * Returns the stats, as name value pairs, for the specified avatar and date.
+   * Tuple of name and value for stats.
    */
-  string[2][] getStats(string avatar, string date) const
+  alias Stat = Tuple!(string, "name", string, "value");
+
+  /**
+   * Returns the stats, as name/value pairs, for the specified avatar and date.
+   */
+  Stat[] getStats(string avatar, string date) const
   {
     if ((avatar.length == 0) || (date.length == 0) || !isPathValid())
       return [];
@@ -150,7 +156,7 @@ class AvatarLogData
       auto fields = stats.split();
 
       // Create an array of name/value pairs.
-      string[2][] statList;
+      Stat[] statList;
       while (fields.length >= 2)
       {
         string name = fields[0];
@@ -159,7 +165,7 @@ class AvatarLogData
         if (name.endsWith(":"))
         {
           // Exclude the trailing colon from the stat name. 
-          statList ~= [name[0 .. $ - 1], fields[0]];
+          statList ~= Stat(name[0 .. $ - 1], fields[0]);
           fields = fields[1 .. $];
         }
       }
