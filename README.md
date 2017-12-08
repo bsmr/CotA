@@ -11,8 +11,7 @@ CotA was originally written in C++ using the Qt framework but, for various reaso
 
 The application will create a json file next to itself in order to persist settings. Deleting that file (cota.json on Linux) is safe and will merely cause the app to use defaults the next time it's run.
 
-For a ZIP file with a Windows build including the GTK+ libraries:
-https://github.com/Barugon/CotA_Win/archive/master.zip
+For a ZIP file with a Windows build (including GTK+ libraries):  https://github.com/Barugon/CotA_Win/archive/master.zip
 
 To build on Windows or Mac, You will need to:
 * Install the 64-bit GTK+ libraries (https://www.gtk.org/download/index.php).
