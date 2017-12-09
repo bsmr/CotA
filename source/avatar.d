@@ -131,7 +131,7 @@ class AvatarLogData
   alias Stat = Tuple!(string, "name", string, "value");
 
   /**
-   * Returns the stats, as name/value pairs, for the specified avatar and date.
+   * Returns the stats for the specified avatar and date.
    */
   Stat[] getStats(string avatar, string date) const
   {
