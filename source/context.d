@@ -635,6 +635,7 @@ class UIContext
     mainBox.packStart(notebook, true, true, 0);
     mainBox.packStart(m_statusBar, false, true, 0);
 
+    m_mainWindow.setResizable(false);
     m_mainWindow.setDefaultSize(480, 640);
     m_mainWindow.add(mainBox);
 
