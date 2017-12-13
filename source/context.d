@@ -1,429 +1,56 @@
 module context;
 
-// dfmt off
-private import avatar;
-private import settings;
-private import util;
+private
+{
+  import avatar;
+  import settings;
+  import util;
 
-private import gdk.Keysyms;
-private import gdk.RGBA;
-private import gdkpixbuf.Pixbuf;
-private import gdkpixbuf.PixbufLoader;
-private import glib.Timeout;
-private import gobject.Value;
-private import gtk.AboutDialog;
-private import gtk.AccelGroup;
-private import gtk.Box;
-private import gtk.Button;
-private import gtk.CellRendererText;
-private import gtk.ComboBox;
-private import gtk.ComboBoxText;
-private import gtk.Container;
-private import gtk.Dialog;
-private import gtk.Entry;
-private import gtk.FileChooserDialog;
-private import gtk.Grid;
-private import gtk.Label;
-private import gtk.ListStore;
-private import gtk.Main;
-private import gtk.MainWindow;
-private import gtk.Menu;
-private import gtk.MenuBar;
-private import gtk.MenuItem;
-private import gtk.Notebook;
-private import gtk.ScrolledWindow;
-private import gtk.SeparatorMenuItem;
-private import gtk.Statusbar;
-private import gtk.TextView;
-private import gtk.TreeIter;
-private import gtk.TreeView;
-private import gtk.TreeViewColumn;
-private import std.algorithm.sorting;
-private import std.conv;
-private import std.string;
-private import std.stdio;
-private import std.uri;
-// dfmt on
+  import gdk.Keysyms;
+  import gdk.RGBA;
+  import gdkpixbuf.Pixbuf;
+  import gdkpixbuf.PixbufLoader;
+  import glib.Timeout;
+  import gobject.Value;
+  import gtk.AboutDialog;
+  import gtk.AccelGroup;
+  import gtk.Box;
+  import gtk.Button;
+  import gtk.CellRendererText;
+  import gtk.ComboBox;
+  import gtk.ComboBoxText;
+  import gtk.Container;
+  import gtk.Dialog;
+  import gtk.Entry;
+  import gtk.FileChooserDialog;
+  import gtk.Grid;
+  import gtk.Label;
+  import gtk.ListStore;
+  import gtk.Main;
+  import gtk.MainWindow;
+  import gtk.Menu;
+  import gtk.MenuBar;
+  import gtk.MenuItem;
+  import gtk.Notebook;
+  import gtk.ScrolledWindow;
+  import gtk.SeparatorMenuItem;
+  import gtk.Statusbar;
+  import gtk.TextView;
+  import gtk.TreeIter;
+  import gtk.TreeView;
+  import gtk.TreeViewColumn;
+  import std.algorithm.sorting;
+  import std.conv;
+  import std.string;
+  import std.stdio;
+  import std.uri;
+}
 
 /**
  * UIContext is simply a container for the application's UI.
  */
 class UIContext
 {
-  private enum versionString = "2.0.1";
-
-  private enum Page
-  {
-    stats = 0,
-    rifts = 1
-  }
-
-  private immutable string m_opensText;
-  private immutable string m_closesText;
-  private immutable string[8] m_places;
-  private immutable string[8] m_placeLinks;
-  private immutable string[8] m_phases;
-  private immutable int[string] m_statOrder;
-
-  private string[int] m_statusMessages;
-
-  private AvatarLogData m_avatarLogData;
-  private Settings m_settings;
-  private MainWindow m_mainWindow;
-  private Statusbar m_statusBar;
-  private ComboBoxText m_avatarsComboBox;
-  private ComboBoxText m_datesComboBox;
-  private ListStore m_statsListStore;
-  private MenuItem m_refreshMenuItem;
-  private MenuItem m_filterMenuItem;
-  private Button m_notesButton;
-  private Grid m_riftsgrid;
-  private Timeout m_riftTimer;
-  private RGBA m_textColor;
-
-  private void setStatusMessage(int page, string message = [])
-  {
-    if (message is null)
-    {
-      if (auto val = page in m_statusMessages)
-        message = *val;
-    }
-    else
-      m_statusMessages[page] = message;
-
-    m_statusBar.removeAll(0);
-    if (message !is null)
-      m_statusBar.push(0, message);
-  }
-
-  private void populateAvatars(string defaultAvatar = [])
-  {
-    m_avatarsComboBox.removeAll();
-    m_datesComboBox.removeAll();
-    m_statsListStore.clear();
-    m_filterMenuItem.setSensitive(false);
-    m_notesButton.setSensitive(false);
-
-    // Get the avatar names that have log entries.
-    auto avatars = m_avatarLogData.getAvatars();
-    if (avatars.length == 0)
-    {
-      setStatusMessage(Page.stats, t("No avatars found"));
-      return;
-    }
-
-    // Sort the avatars.
-    avatars.sort();
-
-    // Add the avatars to the combo box.
-    foreach (avatar; avatars)
-      m_avatarsComboBox.appendText(avatar);
-
-    // Attempt to select the default avatar.
-    if (defaultAvatar.length > 0)
-      m_avatarsComboBox.setActiveText(defaultAvatar);
-
-    // If no avatar is selected then try the very first one in the combo box.
-    if (m_avatarsComboBox.getActive() < 0)
-      m_avatarsComboBox.setActive(0);
-  }
-
-  private void populateDates(string avatar)
-  {
-    m_datesComboBox.removeAll();
-    m_statsListStore.clear();
-    m_filterMenuItem.setSensitive(false);
-    m_notesButton.setSensitive(avatar.length > 0);
-
-    // Update the settings.
-    m_settings.setAvatar(avatar);
-
-    // Get the stat dates for the avatar.
-    auto dates = m_avatarLogData.getStatDates(avatar);
-    if (dates.length == 0)
-    {
-      setStatusMessage(Page.stats, format(t("No stats found for %s"), avatar));
-      return;
-    }
-
-    // Sort the dates so that the most recent date is first in the combo box.
-    // The date strings must be converted to a sortable format during the sort
-    // operation.
-    dates.sort!((a, b) => dateSortable(a) > dateSortable(b))();
-
-    // Add the dates to the combo box.
-    foreach (date; dates)
-      m_datesComboBox.appendText(date);
-
-    m_datesComboBox.setActive(0);
-  }
-
-  private void populateStats(string avatar, string date, string filter = [])
-  {
-    m_statsListStore.clear();
-
-    // Get the stats for the avatar and date.
-    auto stats = m_avatarLogData.getStats(avatar, date);
-    if (stats.length == 0)
-    {
-      setStatusMessage(Page.stats, format(t("No stats found for %s"), avatar));
-      return;
-    }
-
-    // Sort the stats according to the order value.
-    AvatarLogData.Stat[][3] bins;
-    foreach (stat; stats)
-    {
-      // Check if the stat is being filtered.
-      bool searched;
-      if (filter.length > 0)
-      {
-        if (stat.name.indexOf(filter, CaseSensitive.no) < 0)
-          continue;
-
-        searched = true;
-      }
-
-      // Check if the stat is in the order associative array.
-      if (auto val = stat.name in m_statOrder)
-      {
-        // Don't add items with a negative order value unless it's specifically
-        // searched for.
-        if (*val >= 0)
-          bins[*val] ~= stat;
-        else if (searched)
-          bins[2] ~= stat;
-      }
-      else
-        bins[2] ~= stat;
-    }
-
-    string[3] markup;
-    if (m_textColor.alpha > 0.0)
-    {
-      markup[0] = "<span foreground='" ~ htmlColor(m_textColor) ~ "'>%s</span>";
-      markup[1] = "<span foreground='" ~ htmlColor(m_textColor, 0.75) ~ "'>%s</span>";
-      markup[2] = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
-    }
-    else
-    {
-      markup[0] = "%s";
-      markup[1] = "%s";
-      markup[2] = "%s";
-    }
-
-    // Add the sorted stats to the tree view.
-    foreach (binIndex, bin; bins)
-    {
-      foreach (stat; bin)
-      {
-        auto name = new Value(markup[binIndex].replace("%s", stat.name));
-        auto value = new Value(markup[binIndex].replace("%s", stat.value));
-        auto nameSort = new Value(stat.name);
-        auto valueSort = new Value(to!(double)(stat.value));
-
-        TreeIter iter;
-        m_statsListStore.insertWithValuesv(iter, -1, [0, 1, 2, 3], [name,
-            value, nameSort, valueSort]);
-      }
-    }
-
-    m_filterMenuItem.setSensitive(true);
-    setStatusMessage(Page.stats, format(t("Showing stats for %s from %s"), avatar, date));
-  }
-
-  private void updateLunarRifts()
-  {
-    // Get the lunar phase.
-    immutable auto phase = getLunarPhase();
-    int riftNum = cast(int) phase;
-
-    // Get the time remaining for the active lunar rift.
-    immutable double remain = 8.75 * (1.0 - (phase - riftNum));
-    int minutes = cast(int) remain;
-    int seconds = cast(int)(60.0 * (remain - minutes) + 0.5);
-    if (seconds > 59)
-    {
-      ++minutes;
-      seconds -= 60;
-    }
-
-    string phaseMarkup;
-    string riftMarkup;
-    if (m_textColor.alpha() > 0.0)
-    {
-      phaseMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
-      riftMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>"
-        ~ m_opensText ~ "</span>";
-    }
-    else
-    {
-      phaseMarkup = "%s";
-      riftMarkup = m_opensText;
-    }
-
-    for (int num; num < 8; ++num)
-    {
-      if (num == 0)
-      {
-        // The first item is the active lunar rift.
-        if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
-        {
-          placeLabel.setText(
-              "<a href=\"" ~ m_placeLinks[riftNum] ~ "\"><b>" ~ m_places[riftNum] ~ "</b></a>");
-          placeLabel.setUseMarkup(true);
-        }
-
-        if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
-          phaseLabel.setText(m_phases[riftNum]);
-
-        if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
-          riftLabel.setText(format(m_closesText, minutes, seconds));
-      }
-      else
-      {
-        // Draw the inactive lunar rifts in a less pronounced way.
-        if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
-        {
-          placeLabel.setText("<a href=\"" ~ m_placeLinks[riftNum] ~ "\">"
-              ~ m_places[riftNum] ~ "</a>");
-          placeLabel.setUseMarkup(true);
-        }
-
-        if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
-        {
-          phaseLabel.setText(phaseMarkup.replace("%s", m_phases[riftNum]));
-          phaseLabel.setUseMarkup(true);
-        }
-
-        if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
-        {
-          riftLabel.setText(format(riftMarkup, minutes, seconds));
-          riftLabel.setUseMarkup(true);
-        }
-
-        // Add time for the next lunar rift.
-        minutes += 8;
-        seconds += 45;
-        if (seconds > 59)
-        {
-          ++minutes;
-          seconds -= 60;
-        }
-      }
-
-      if (++riftNum > 7)
-        riftNum = 0;
-    }
-  }
-
-  private void selectLogFolder()
-  {
-    auto folderDialog = new FileChooserDialog(t("Select SotA Log Folder"),
-        m_mainWindow, FileChooserAction.SELECT_FOLDER);
-    folderDialog.setFilename(m_settings.getLogFolder());
-
-    if (folderDialog.run() == ResponseType.OK)
-    {
-      const string folder = folderDialog.getFilename();
-      if (m_settings.setLogFolder(folder))
-      {
-        m_avatarLogData = new AvatarLogData(folder);
-        populateAvatars(m_avatarsComboBox.getActiveText());
-      }
-    }
-
-    folderDialog.close();
-  }
-
-  private void modifyNotes(string avatar)
-  {
-    if (avatar.length == 0)
-      return;
-
-    // Create the dialog with OK and Cancel buttons.
-    auto notesDialog = new Dialog();
-    notesDialog.setDefaultSize(300, 300);
-    notesDialog.setTitle(format(t("Notes for %s"), avatar));
-    notesDialog.setTransientFor(m_mainWindow);
-    notesDialog.addButtons([StockID.OK, StockID.CANCEL], [ResponseType.OK, ResponseType.CANCEL]);
-
-    // Add the text entry field.
-    auto textView = new TextView();
-    textView.setVisible(true);
-
-    // Get previously stored notes.
-    auto text = m_settings.getNotes(avatar);
-    if (text.length > 0)
-      textView.getBuffer().setText(text);
-
-    auto contentArea = notesDialog.getContentArea();
-    contentArea.setMargins(3, 3, 3, 3);
-    contentArea.setSpacing(3);
-    contentArea.packStart(textView, true, true, 0);
-
-    // Run the dialog and get the result.
-    if (notesDialog.run() == ResponseType.OK)
-      m_settings.setNotes(avatar, textView.getBuffer().getText());
-
-    notesDialog.close();
-  }
-
-  private string getFilter()
-  {
-    // Create the dialog with OK and Cancel buttons.
-    auto filterDialog = new Dialog();
-    filterDialog.setDefaultSize(10, 10);
-    filterDialog.setTitle(t("Filter"));
-    filterDialog.setTransientFor(m_mainWindow);
-    filterDialog.addButtons([StockID.OK, StockID.CANCEL], [ResponseType.OK, ResponseType.CANCEL]);
-
-    // Add the text entry field.
-    auto entry = new Entry();
-    entry.addOnActivate((Entry) { filterDialog.response(ResponseType.OK); });
-    entry.setVisible(true);
-
-    auto contentArea = filterDialog.getContentArea();
-    contentArea.setMargins(3, 3, 3, 3);
-    contentArea.setSpacing(3);
-    contentArea.packStart(entry, false, true, 0);
-
-    // Run the dialog and get the result.
-    string filterText;
-    if (filterDialog.run() == ResponseType.OK)
-      filterText = entry.getText();
-
-    filterDialog.close();
-    return filterText;
-  }
-
-  private void about()
-  {
-    enum int logoBorderSize = 2;
-
-    auto icon = m_mainWindow.getIcon();
-    immutable int width = icon.getWidth();
-    immutable int height = icon.getHeight();
-
-    // Create the logo with a 2px black border.
-    auto logo = new Pixbuf(icon.getColorspace(), icon.getHasAlpha(),
-        icon.getBitsPerSample(), width + logoBorderSize * 2, height + logoBorderSize * 2);
-    logo.fill(0x000000FF);
-    icon.copyArea(0, 0, width, height, logo, logoBorderSize, logoBorderSize);
-
-    auto aboutDialog = new AboutDialog();
-    aboutDialog.setTransientFor(m_mainWindow);
-    aboutDialog.setAuthors(["Barugon"]);
-    aboutDialog.setComments(m_mainWindow.getTitle());
-    aboutDialog.setLicense(t("The CotA application and it's source code are public domain."));
-    aboutDialog.setLogo(logo);
-    aboutDialog.setProgramName("CotA");
-    aboutDialog.setVersion(versionString);
-    aboutDialog.setWebsite("https://github.com/Barugon/CotA");
-    aboutDialog.run();
-    aboutDialog.close();
-  }
-
   /**
    * Construction initializes the UI.
    */
@@ -656,5 +283,383 @@ class UIContext
   void show()
   {
     m_mainWindow.showAll();
+  }
+
+  private
+  {
+    enum versionString = "2.0.1";
+
+    enum Page
+    {
+      stats = 0,
+      rifts = 1
+    }
+
+    immutable string m_opensText;
+    immutable string m_closesText;
+    immutable string[8] m_places;
+    immutable string[8] m_placeLinks;
+    immutable string[8] m_phases;
+    immutable int[string] m_statOrder;
+
+    string[int] m_statusMessages;
+
+    AvatarLogData m_avatarLogData;
+    Settings m_settings;
+    MainWindow m_mainWindow;
+    Statusbar m_statusBar;
+    ComboBoxText m_avatarsComboBox;
+    ComboBoxText m_datesComboBox;
+    ListStore m_statsListStore;
+    MenuItem m_refreshMenuItem;
+    MenuItem m_filterMenuItem;
+    Button m_notesButton;
+    Grid m_riftsgrid;
+    Timeout m_riftTimer;
+    RGBA m_textColor;
+
+    void setStatusMessage(int page, string message = [])
+    {
+      if (message is null)
+      {
+        if (auto val = page in m_statusMessages)
+          message = *val;
+      }
+      else
+        m_statusMessages[page] = message;
+
+      m_statusBar.removeAll(0);
+      if (message !is null)
+        m_statusBar.push(0, message);
+    }
+
+    void populateAvatars(string defaultAvatar = [])
+    {
+      m_avatarsComboBox.removeAll();
+      m_datesComboBox.removeAll();
+      m_statsListStore.clear();
+      m_filterMenuItem.setSensitive(false);
+      m_notesButton.setSensitive(false);
+
+      // Get the avatar names that have log entries.
+      auto avatars = m_avatarLogData.getAvatars();
+      if (avatars.length == 0)
+      {
+        setStatusMessage(Page.stats, t("No avatars found"));
+        return;
+      }
+
+      // Sort the avatars.
+      avatars.sort();
+
+      // Add the avatars to the combo box.
+      foreach (avatar; avatars)
+        m_avatarsComboBox.appendText(avatar);
+
+      // Attempt to select the default avatar.
+      if (defaultAvatar.length > 0)
+        m_avatarsComboBox.setActiveText(defaultAvatar);
+
+      // If no avatar is selected then try the very first one in the combo box.
+      if (m_avatarsComboBox.getActive() < 0)
+        m_avatarsComboBox.setActive(0);
+    }
+
+    void populateDates(string avatar)
+    {
+      m_datesComboBox.removeAll();
+      m_statsListStore.clear();
+      m_filterMenuItem.setSensitive(false);
+      m_notesButton.setSensitive(avatar.length > 0);
+
+      // Update the settings.
+      m_settings.setAvatar(avatar);
+
+      // Get the stat dates for the avatar.
+      auto dates = m_avatarLogData.getStatDates(avatar);
+      if (dates.length == 0)
+      {
+        setStatusMessage(Page.stats, format(t("No stats found for %s"), avatar));
+        return;
+      }
+
+      // Sort the dates so that the most recent date is first in the combo box.
+      // The date strings must be converted to a sortable format during the sort
+      // operation.
+      dates.sort!((a, b) => dateSortable(a) > dateSortable(b))();
+
+      // Add the dates to the combo box.
+      foreach (date; dates)
+        m_datesComboBox.appendText(date);
+
+      m_datesComboBox.setActive(0);
+    }
+
+    void populateStats(string avatar, string date, string filter = [])
+    {
+      m_statsListStore.clear();
+
+      // Get the stats for the avatar and date.
+      auto stats = m_avatarLogData.getStats(avatar, date);
+      if (stats.length == 0)
+      {
+        setStatusMessage(Page.stats, format(t("No stats found for %s"), avatar));
+        return;
+      }
+
+      // Sort the stats according to the order value.
+      AvatarLogData.Stat[][3] bins;
+      foreach (stat; stats)
+      {
+        // Check if the stat is being filtered.
+        bool searched;
+        if (filter.length > 0)
+        {
+          if (stat.name.indexOf(filter, CaseSensitive.no) < 0)
+            continue;
+
+          searched = true;
+        }
+
+        // Check if the stat is in the order associative array.
+        if (auto val = stat.name in m_statOrder)
+        {
+          // Don't add items with a negative order value unless it's specifically
+          // searched for.
+          if (*val >= 0)
+            bins[*val] ~= stat;
+          else if (searched)
+            bins[2] ~= stat;
+        }
+        else
+          bins[2] ~= stat;
+      }
+
+      string[3] markup;
+      if (m_textColor.alpha > 0.0)
+      {
+        markup[0] = "<span foreground='" ~ htmlColor(m_textColor) ~ "'>%s</span>";
+        markup[1] = "<span foreground='" ~ htmlColor(m_textColor, 0.75) ~ "'>%s</span>";
+        markup[2] = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
+      }
+      else
+      {
+        markup[0] = "%s";
+        markup[1] = "%s";
+        markup[2] = "%s";
+      }
+
+      // Add the sorted stats to the tree view.
+      foreach (binIndex, bin; bins)
+      {
+        foreach (stat; bin)
+        {
+          auto name = new Value(markup[binIndex].replace("%s", stat.name));
+          auto value = new Value(markup[binIndex].replace("%s", stat.value));
+          auto nameSort = new Value(stat.name);
+          auto valueSort = new Value(to!(double)(stat.value));
+
+          TreeIter iter;
+          m_statsListStore.insertWithValuesv(iter, -1, [0, 1, 2, 3], [name,
+              value, nameSort, valueSort]);
+        }
+      }
+
+      m_filterMenuItem.setSensitive(true);
+      setStatusMessage(Page.stats, format(t("Showing stats for %s from %s"), avatar, date));
+    }
+
+    void updateLunarRifts()
+    {
+      // Get the lunar phase.
+      immutable auto phase = getLunarPhase();
+      int riftNum = cast(int) phase;
+
+      // Get the time remaining for the active lunar rift.
+      immutable double remain = 8.75 * (1.0 - (phase - riftNum));
+      int minutes = cast(int) remain;
+      int seconds = cast(int)(60.0 * (remain - minutes) + 0.5);
+      if (seconds > 59)
+      {
+        ++minutes;
+        seconds -= 60;
+      }
+
+      string phaseMarkup;
+      string riftMarkup;
+      if (m_textColor.alpha() > 0.0)
+      {
+        phaseMarkup = "<span foreground='" ~ htmlColor(m_textColor, 0.5) ~ "'>%s</span>";
+        riftMarkup = "<span foreground='" ~ htmlColor(m_textColor,
+            0.5) ~ "'>" ~ m_opensText ~ "</span>";
+      }
+      else
+      {
+        phaseMarkup = "%s";
+        riftMarkup = m_opensText;
+      }
+
+      for (int num; num < 8; ++num)
+      {
+        if (num == 0)
+        {
+          // The first item is the active lunar rift.
+          if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
+          {
+            placeLabel.setText(
+                "<a href=\"" ~ m_placeLinks[riftNum] ~ "\"><b>" ~ m_places[riftNum] ~ "</b></a>");
+            placeLabel.setUseMarkup(true);
+          }
+
+          if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
+            phaseLabel.setText(m_phases[riftNum]);
+
+          if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
+            riftLabel.setText(format(m_closesText, minutes, seconds));
+        }
+        else
+        {
+          // Draw the inactive lunar rifts in a less pronounced way.
+          if (auto placeLabel = cast(Label) m_riftsgrid.getChildAt(0, riftNum))
+          {
+            placeLabel.setText(
+                "<a href=\"" ~ m_placeLinks[riftNum] ~ "\">" ~ m_places[riftNum] ~ "</a>");
+            placeLabel.setUseMarkup(true);
+          }
+
+          if (auto phaseLabel = cast(Label) m_riftsgrid.getChildAt(1, riftNum))
+          {
+            phaseLabel.setText(phaseMarkup.replace("%s", m_phases[riftNum]));
+            phaseLabel.setUseMarkup(true);
+          }
+
+          if (auto riftLabel = cast(Label) m_riftsgrid.getChildAt(2, riftNum))
+          {
+            riftLabel.setText(format(riftMarkup, minutes, seconds));
+            riftLabel.setUseMarkup(true);
+          }
+
+          // Add time for the next lunar rift.
+          minutes += 8;
+          seconds += 45;
+          if (seconds > 59)
+          {
+            ++minutes;
+            seconds -= 60;
+          }
+        }
+
+        if (++riftNum > 7)
+          riftNum = 0;
+      }
+    }
+
+    void selectLogFolder()
+    {
+      auto folderDialog = new FileChooserDialog(t("Select SotA Log Folder"),
+          m_mainWindow, FileChooserAction.SELECT_FOLDER);
+      folderDialog.setFilename(m_settings.getLogFolder());
+
+      if (folderDialog.run() == ResponseType.OK)
+      {
+        const string folder = folderDialog.getFilename();
+        if (m_settings.setLogFolder(folder))
+        {
+          m_avatarLogData = new AvatarLogData(folder);
+          populateAvatars(m_avatarsComboBox.getActiveText());
+        }
+      }
+
+      folderDialog.close();
+    }
+
+    void modifyNotes(string avatar)
+    {
+      if (avatar.length == 0)
+        return;
+
+      // Create the dialog with OK and Cancel buttons.
+      auto notesDialog = new Dialog();
+      notesDialog.setDefaultSize(300, 300);
+      notesDialog.setTitle(format(t("Notes for %s"), avatar));
+      notesDialog.setTransientFor(m_mainWindow);
+      notesDialog.addButtons([StockID.OK, StockID.CANCEL], [ResponseType.OK, ResponseType.CANCEL]);
+
+      // Add the text entry field.
+      auto textView = new TextView();
+      textView.setVisible(true);
+
+      // Get previously stored notes.
+      auto text = m_settings.getNotes(avatar);
+      if (text.length > 0)
+        textView.getBuffer().setText(text);
+
+      auto contentArea = notesDialog.getContentArea();
+      contentArea.setMargins(3, 3, 3, 3);
+      contentArea.setSpacing(3);
+      contentArea.packStart(textView, true, true, 0);
+
+      // Run the dialog and get the result.
+      if (notesDialog.run() == ResponseType.OK)
+        m_settings.setNotes(avatar, textView.getBuffer().getText());
+
+      notesDialog.close();
+    }
+
+    string getFilter()
+    {
+      // Create the dialog with OK and Cancel buttons.
+      auto filterDialog = new Dialog();
+      filterDialog.setDefaultSize(10, 10);
+      filterDialog.setTitle(t("Filter"));
+      filterDialog.setTransientFor(m_mainWindow);
+      filterDialog.addButtons([StockID.OK, StockID.CANCEL], [ResponseType.OK,
+          ResponseType.CANCEL]);
+
+      // Add the text entry field.
+      auto entry = new Entry();
+      entry.addOnActivate((Entry) { filterDialog.response(ResponseType.OK); });
+      entry.setVisible(true);
+
+      auto contentArea = filterDialog.getContentArea();
+      contentArea.setMargins(3, 3, 3, 3);
+      contentArea.setSpacing(3);
+      contentArea.packStart(entry, false, true, 0);
+
+      // Run the dialog and get the result.
+      string filterText;
+      if (filterDialog.run() == ResponseType.OK)
+        filterText = entry.getText();
+
+      filterDialog.close();
+      return filterText;
+    }
+
+    void about()
+    {
+      enum int logoBorderSize = 2;
+
+      auto icon = m_mainWindow.getIcon();
+      immutable int width = icon.getWidth();
+      immutable int height = icon.getHeight();
+
+      // Create the logo with a 2px black border.
+      auto logo = new Pixbuf(icon.getColorspace(), icon.getHasAlpha(),
+          icon.getBitsPerSample(), width + logoBorderSize * 2, height + logoBorderSize * 2);
+      logo.fill(0x000000FF);
+      icon.copyArea(0, 0, width, height, logo, logoBorderSize, logoBorderSize);
+
+      auto aboutDialog = new AboutDialog();
+      aboutDialog.setTransientFor(m_mainWindow);
+      aboutDialog.setAuthors(["Barugon"]);
+      aboutDialog.setComments(m_mainWindow.getTitle());
+      aboutDialog.setLicense(t("The CotA application and it's source code are public domain."));
+      aboutDialog.setLogo(logo);
+      aboutDialog.setProgramName("CotA");
+      aboutDialog.setVersion(versionString);
+      aboutDialog.setWebsite("https://github.com/Barugon/CotA");
+      aboutDialog.run();
+      aboutDialog.close();
+    }
   }
 }

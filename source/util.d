@@ -1,14 +1,15 @@
 module util;
 
-// dfmt off
-private import gdk.RGBA;
-private import glib.Internationalization;
-private import gtk.Widget;
-private import std.algorithm.comparison;
-private import std.conv;
-private import std.datetime;
-private import std.string;
-// dfmt on
+private
+{
+  import gdk.RGBA;
+  import glib.Internationalization;
+  import gtk.Widget;
+  import std.algorithm.comparison;
+  import std.conv;
+  import std.datetime;
+  import std.string;
+}
 
 /**
  * Localize a string.

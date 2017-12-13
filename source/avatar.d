@@ -1,37 +1,38 @@
 module avatar;
 
-// dfmt off
-private import std.file;
-private import std.path;
-private import std.stdio;
-private import std.string;
-private import std.typecons;
-// dfmt on
-
-private string getDate(const char[] line, string search)
+private
 {
-  if (line.indexOf('[') == 0)
+  import std.file;
+  import std.path;
+  import std.stdio;
+  import std.string;
+  import std.typecons;
+
+  string getDate(const char[] line, string search)
   {
-    immutable auto searchPos = (search.length > 0
-        ? cast(long) line.indexOf(search) : cast(long) line.length);
-    if (searchPos > 0)
+    if (line.indexOf('[') == 0)
     {
-      immutable auto bracketPos = line.indexOf("] ");
-      if ((bracketPos > 1) && (bracketPos < searchPos))
-        return line[1 .. bracketPos].dup();
+      immutable auto searchPos = (search.length > 0
+          ? cast(long) line.indexOf(search) : cast(long) line.length);
+      if (searchPos > 0)
+      {
+        immutable auto bracketPos = line.indexOf("] ");
+        if ((bracketPos > 1) && (bracketPos < searchPos))
+          return line[1 .. bracketPos].dup();
+      }
     }
+
+    return [];
   }
 
-  return [];
-}
+  string getText(const char[] line, string date, string search)
+  {
+    string start = "[" ~ date ~ "] ";
+    if (line.startsWith(start) && ((search.length == 0) || (line.indexOf(search) > 0)))
+      return line[start.length .. $].dup();
 
-private string getText(const char[] line, string date, string search)
-{
-  string start = "[" ~ date ~ "] ";
-  if (line.startsWith(start) && ((search.length == 0) || (line.indexOf(search) > 0)))
-    return line[start.length .. $].dup();
-
-  return [];
+    return [];
+  }
 }
 
 /**
@@ -39,25 +40,6 @@ private string getText(const char[] line, string date, string search)
  */
 class AvatarLogData
 {
-  private enum Strings
-  {
-    logNameStart = "SotAChatLog_",
-    adventurerLevel = "AdventurerLevel: "
-  }
-
-  private string m_path;
-
-  private bool isPathValid() const
-  {
-    return exists(m_path) && isDir(m_path);
-  }
-
-  private auto getLogFileEntries(string avatar = []) const
-  {
-    return dirEntries(m_path, Strings.logNameStart ~ (avatar.length > 0
-        ? avatar.replace(" ", "_") : "*") ~ "_????-??-??.txt", SpanMode.shallow);
-  }
-
   /**
    * Constructor.
    */
@@ -174,5 +156,27 @@ class AvatarLogData
     }
 
     return [];
+  }
+
+  private
+  {
+    enum Strings
+    {
+      logNameStart = "SotAChatLog_",
+      adventurerLevel = "AdventurerLevel: "
+    }
+
+    string m_path;
+
+    bool isPathValid() const
+    {
+      return exists(m_path) && isDir(m_path);
+    }
+
+    auto getLogFileEntries(string avatar = []) const
+    {
+      return dirEntries(m_path, Strings.logNameStart ~ (avatar.length > 0
+          ? avatar.replace(" ", "_") : "*") ~ "_????-??-??.txt", SpanMode.shallow);
+    }
   }
 }

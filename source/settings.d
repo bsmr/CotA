@@ -1,35 +1,17 @@
 module settings;
 
-// dfmt off
-private import glib.Util;
-private import std.file;
-private import std.json;
-// dfmt on
+private
+{
+  import glib.Util;
+  import std.file;
+  import std.json;
+}
 
 /**
  * Simple application settings object.
  */
 class Settings
 {
-  private enum Keys
-  {
-    logFolder = "Log Folder",
-    avatar = "Avatar",
-    notes = " Notes"
-  }
-
-  private string m_filePath;
-  private JSONValue m_json;
-
-  private bool store() const
-  {
-    if (m_json.type != JSON_TYPE.OBJECT)
-      return false;
-
-    write(m_filePath, m_json.toString());
-    return true;
-  }
-
   /**
    * Construction.
    */
@@ -129,5 +111,27 @@ class Settings
 
     m_json[avatar ~ Keys.notes] = notes;
     return store();
+  }
+
+  private
+  {
+    enum Keys
+    {
+      logFolder = "Log Folder",
+      avatar = "Avatar",
+      notes = " Notes"
+    }
+
+    string m_filePath;
+    JSONValue m_json;
+
+    bool store() const
+    {
+      if (m_json.type != JSON_TYPE.OBJECT)
+        return false;
+
+      write(m_filePath, m_json.toString());
+      return true;
+    }
   }
 }

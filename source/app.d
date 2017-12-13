@@ -1,7 +1,8 @@
-// dfmt off
-private import context;
-private import gtk.Main;
-// dfmt on
+private
+{
+  import context;
+  import gtk.Main;
+}
 
 void main(string[] args)
 {
