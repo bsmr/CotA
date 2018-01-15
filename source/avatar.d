@@ -69,8 +69,8 @@ class AvatarLogData
       if (name.length == 0)
         continue;
 
-      // Replace underscores with spaces and add the name to the set.
-      ++nameSet[name.replace("_", " ")];
+      // Add the name to the set.
+      ++nameSet[name];
     }
 
     if (nameSet.length == 0)
@@ -175,8 +175,8 @@ class AvatarLogData
 
     auto getLogFileEntries(string avatar = []) const
     {
-      return dirEntries(m_path, Strings.logNameStart ~ (avatar.length > 0
-          ? avatar.replace(" ", "_") : "*") ~ "_????-??-??.txt", SpanMode.shallow);
+      auto fileName = Strings.logNameStart ~ (avatar.length > 0 ? avatar : "*") ~ "_????-??-??.txt";
+      return dirEntries(m_path, fileName, SpanMode.shallow);
     }
   }
 }
