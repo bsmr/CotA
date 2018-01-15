@@ -1,17 +1,17 @@
 {
-	"name": "cota",
-	"authors": [
-		"Barugon"
-	],
-	"dependencies": {
-		"gtk-d": "3.7.2"
-	},
-	"description": "Companion of the Avatar",
-	"license": "public domain",
+  "name": "cota",
+  "authors": [
+    "Barugon"
+  ],
+  "dependencies": {
+    "gtk-d": "3.7.2"
+  },
+  "description": "Companion of the Avatar",
+  "license": "public domain",
   "dflags": [
     "-J."
   ],
-  "lflags-windows" : [
+  "lflags-windows": [
     "/SUBSYSTEM:windows,6.00",
     "/ENTRY:mainCRTStartup"
   ]
