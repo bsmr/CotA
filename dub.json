@@ -9,7 +9,7 @@
   "description": "Companion of the Avatar",
   "license": "public domain",
   "dflags": [
-    "-J."
+    "-Jres"
   ],
   "lflags-windows": [
     "/SUBSYSTEM:windows,6.00",
