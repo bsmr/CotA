@@ -275,13 +275,7 @@ class UIContext
     });
 
     populateAvatars(m_settings.getAvatar());
-  }
 
-  /**
-   * Show the main window.
-   */
-  void show()
-  {
     m_mainWindow.showAll();
   }
 
