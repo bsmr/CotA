@@ -1,4 +1,5 @@
 # Companion of the Avatar
+---
 CotA is a small application to nicely display the stats recorded to a chat log file from Shroud of the Avatar. Hint: press F5 to refresh the display after typing ```/stats``` in-game. 
 
 ![screenshot](http://a4.pbase.com/o10/09/605909/1/164136608.HlZbUjYn.Screenshotfrom20171123164324.png)
@@ -22,7 +23,3 @@ To build on Windows or Mac, You will need to:
 It may take a long time to build the gtk-d libraries.
 
 NOTE: On Windows, the GTK+ installer doesn't seem to add the location of the DLLs to the PATH environment variable. You will need to do this manually. In Windows 10, click on "Search Windows" in the task bar, start typing "environment" then click on "Edit the system environment variables". From there, click the "Environment Variables" button and then add the path of the GTK+ DLLs (probably ```C:\msys64\mingw64\bin```) to "Path" in "System variables". 
-
----
-
-This code is released as public domain. Do with it as you want but I am not liable for any of it.
