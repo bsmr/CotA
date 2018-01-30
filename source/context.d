@@ -380,7 +380,7 @@ class UIContext
       // Sort the dates so that the most recent date is first in the combo box.
       // The date strings must be converted to a sortable format during the sort
       // operation.
-      dates.sort!((a, b) => dateSortable(a) > dateSortable(b))();
+      dates.sort!((a, b) => dateToULong(a) > dateToULong(b))();
 
       // Add the dates to the combo box.
       foreach (date; dates)

@@ -41,9 +41,9 @@ string htmlColor(RGBA color, double opacity = 1.0)
 }
 
 /**
- * Convert a SotA logfile date string into a sortable format.
+ * Convert a SotA logfile date string into a sortable ulong.
  */
-ulong dateSortable(string date)
+ulong dateToULong(string date)
 {
   // Split the string into the date, time and am/pm components.
   immutable auto components = date.split();
@@ -71,7 +71,7 @@ ulong dateSortable(string date)
   immutable auto minute = to!(int)(timeParts[1]);
   immutable auto second = to!(int)(timeParts[2]);
 
-  // Convert the values into one big sortable ulong; 
+  // Format the return value. 
   return year * (10UL ^^ 10) + month * (10UL ^^ 8) + day * (10UL ^^ 6) + hour * (
       10UL ^^ 4) + minute * (10UL ^^ 2) + second;
 }
