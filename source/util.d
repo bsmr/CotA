@@ -82,7 +82,7 @@ ulong dateToULong(string date)
 double getLunarPhase()
 {
   // Get the current UTC time.
-  auto dateTime = cast(DateTime) Clock.currTime(UTC());
+  immutable auto dateTime = cast(DateTime) Clock.currTime(UTC());
 
   // Get the duration since the lunar rift epoch.
   immutable auto duration = dateTime - DateTime(1997, 9, 2, 0, 0, 0);
