@@ -95,8 +95,12 @@ class AvatarLogData
     string[] dates;
     foreach (fileName; getLogFileEntries(avatar))
     {
+      auto file = File(fileName, "r");
+      if (!file.isOpen)
+        continue;
+
       // Search the log file for stat entries.
-      foreach (line; File(fileName, "r").byLine())
+      foreach (line; file.byLine())
       {
         string date = getDate(line, Strings.adventurerLevel);
         if (date.length > 0)
@@ -122,9 +126,13 @@ class AvatarLogData
 
     foreach (fileName; getLogFileEntries(avatar))
     {
+      auto file = File(fileName, "r");
+      if (!file.isOpen)
+        continue;
+
       // Search the log file for the "/stats" entry that matches the date.
       string stats;
-      foreach (line; File(fileName, "r").byLine())
+      foreach (line; file.byLine())
       {
         stats = getText(line, date, Strings.adventurerLevel);
         if (stats.length > 0)
