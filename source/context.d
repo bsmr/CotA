@@ -281,7 +281,7 @@ class UIContext
 
   private
   {
-    enum versionString = "2.0.1";
+    enum versionString = "2.0.2";
 
     enum Page
     {
