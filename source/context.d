@@ -386,6 +386,7 @@ class UIContext
       foreach (date; dates)
         m_datesComboBox.appendText(date);
 
+      // Select the most recent date.
       m_datesComboBox.setActive(0);
     }
 
@@ -397,7 +398,7 @@ class UIContext
       auto stats = m_avatarLogData.getStats(avatar, date);
       if (stats.length == 0)
       {
-        setStatusMessage(Page.stats, format(t("No stats found for %s"), avatar));
+        setStatusMessage(Page.stats, format(t("No stats found for %s on %s"), avatar, date));
         return;
       }
 
