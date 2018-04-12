@@ -94,7 +94,7 @@ class UIContext
     if (!styleContext.lookupColor("text_color", m_textColor))
       styleContext.lookupColor("theme_text_color", m_textColor);
 
-    // Load the winlow icon.
+    // Load the window icon.
     auto pixbufLoader = new PixbufLoader();
     if (pixbufLoader.write(cast(char[]) import("icon.png")))
       m_mainWindow.setIcon(pixbufLoader.getPixbuf());
