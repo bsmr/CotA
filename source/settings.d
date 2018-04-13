@@ -122,7 +122,7 @@ class Settings
       notes = " Notes"
     }
 
-    string m_filePath;
+    immutable string m_filePath;
     JSONValue m_json;
 
     bool store() const
