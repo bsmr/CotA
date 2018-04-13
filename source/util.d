@@ -105,5 +105,5 @@ double getLostValeCountdown()
 
   // Calculate the number of minutes to the next Lost Vale appearence. They are
   // 28 hours (100800 seconds) appart.
-  return (duration.total!("seconds") % 100_800) / 60.0;
+  return 1680 - (duration.total!("seconds") % 100_800) / 60.0;
 }
