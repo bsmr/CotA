@@ -91,3 +91,19 @@ double getLunarPhase()
   // there are 8 phases, for a total of 4200 seconds per lunar cycle.
   return (duration.total!("seconds") % 4200) / 525.0;
 }
+
+/**
+ * Returns the current Lost Vale countdown (in minutes) as a double.
+ */
+double getLostValeCountdown()
+{
+  // Get the current UTC time.
+  immutable auto dateTime = cast(DateTime) Clock.currTime(UTC());
+
+  // Get the duration since 2018/02/23 13:00:00 UTC (first sighting).
+  immutable auto duration = dateTime - DateTime(2018, 2, 23, 13, 0, 0);
+
+  // Calculate the number of minutes to the next Lost Vale appearence. They are
+  // 28 hours (100800 seconds) appart.
+  return (duration.total!("seconds") % 100_800) / 60.0;
+}
