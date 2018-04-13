@@ -58,6 +58,8 @@ class UIContext
   {
     m_opensText = t("Opens in %02dm %02ds");
     m_closesText = t("Closes in %02dm %02ds");
+    m_lvOpensText = t("Lost Vale opens in %02dh %02dm %02ds");
+    m_lvClosesText = t("Lost Vale closes in %02dm %02ds");
     m_places = [t("Blood River"), t("Solace Bridge"), t("Highvale"),
       t("Brookside"), t("Owl's Head"), t("Westend"), t("Brittany Graveyard"), t("Etceter")];
     m_placeLinks = ["https://www.shroudoftheavatar.com/map/?map_id=1&amp;poi_id=310&amp;openPopup=true&amp;z=4",
@@ -214,6 +216,9 @@ class UIContext
       m_riftsgrid.attach(riftLabel, 2, index, 1, 1);
     }
 
+    m_lostValeLabel = new Label("");
+    m_lostValeLabel.setJustify(Justification.CENTER);
+
     auto chronoLabel = new Label(
         t("The accuracy of this lunar rift chronometer\n" ~ "depends entirely on your system clock.\n\n"
         ~ "For best results, please set your system\n" ~ "clock to synchronize with internet time."));
@@ -221,6 +226,7 @@ class UIContext
 
     auto riftsBox = new Box(Orientation.VERTICAL, 10);
     riftsBox.packStart(m_riftsgrid, false, true, 0);
+    riftsBox.packStart(m_lostValeLabel, false, true, 10);
     riftsBox.packStart(chronoLabel, true, true, 0);
 
     auto notebook = new Notebook();
@@ -291,6 +297,8 @@ class UIContext
 
     immutable string m_opensText;
     immutable string m_closesText;
+    immutable string m_lvOpensText;
+    immutable string m_lvClosesText;
     immutable string[8] m_places;
     immutable string[8] m_placeLinks;
     immutable string[8] m_phases;
@@ -309,6 +317,7 @@ class UIContext
     MenuItem m_filterMenuItem;
     Button m_notesButton;
     Grid m_riftsgrid;
+    Label m_lostValeLabel;
     Timeout m_riftTimer;
     RGBA m_textColor;
 
@@ -546,6 +555,33 @@ class UIContext
 
         if (++riftNum > 7)
           riftNum = 0;
+      }
+
+      // Get the Lost Vale countdown.
+      immutable auto countdown = getLostValeCountdown();
+      immutable auto open = countdown - (27 * 60);
+
+      if (open >= 0)
+      {
+        minutes = cast(int) open;
+        seconds = cast(int)(60.0 * (open - minutes) + 0.5);
+
+        m_lostValeLabel.setText(format(m_lvClosesText, minutes, seconds));
+      }
+      else
+      {
+        string lostValeMarkup = m_lvOpensText;
+        if (m_textColor.alpha() > 0.0)
+        {
+          lostValeMarkup = "<span foreground='" ~ htmlColor(m_textColor,
+              0.5) ~ "'>" ~ m_lvOpensText ~ "</span>";
+        }
+
+        minutes = cast(int) countdown;
+        seconds = cast(int)(60.0 * (countdown - minutes) + 0.5);
+
+        m_lostValeLabel.setText(format(lostValeMarkup, minutes / 60, minutes % 60, seconds));
+        m_lostValeLabel.setUseMarkup(true);
       }
     }
 
