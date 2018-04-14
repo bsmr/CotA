@@ -5,7 +5,7 @@ CotA is a small application to nicely display the stats recorded to a chat log f
 
 It also has this sweet lunar rift chronometer.
 
-![screenshot](http://a4.pbase.com/o10/09/605909/1/166622004.JBLHOjc8.Screenshotfrom20171124194648.png)
+![screenshot](http://a4.pbase.com/o10/09/605909/1/166622004.UBo8sf2i.Screenshotfrom20180414102236.png)
 
 CotA was originally written in C++ using the Qt framework but, for various reasons, I have since completely rewritten it in D using GTK+ as the framework. The main reason for this was so that I could provide a stand-alone Linux binary which requires no installation. Just grab the Linux binary above (cota, no extension) and run it. The only requirement is that you have GTK+ 3.22 or above installed. If you're running an up-to-date distribution then it's likely already installed.
 
