@@ -81,11 +81,11 @@ class UIContext
 
     m_mainWindow = new MainWindow(t("Companion of the Avatar"));
     m_mainWindow.addOnDelete((Event, Widget) {
-      // Make sure that the rift timer is stopped when the window is closed.
-      if (m_riftTimer !is null)
+      // Make sure that the portal timer is stopped when the window is closed.
+      if (m_portalTimer !is null)
       {
-        m_riftTimer.stop();
-        m_riftTimer = null;
+        m_portalTimer.stop();
+        m_portalTimer = null;
       }
 
       return false;
@@ -220,7 +220,7 @@ class UIContext
     m_lostValeLabel.setJustify(Justification.CENTER);
 
     auto chronoLabel = new Label(
-        t("The accuracy of this lunar rift chronometer\n" ~ "depends entirely on your system clock.\n\n"
+        t("The accuracy of this portal chronometer\n" ~ "depends entirely on your system clock.\n\n"
         ~ "For best results, please set your system\n" ~ "clock to synchronize with internet time."));
     chronoLabel.setJustify(Justification.CENTER);
 
@@ -231,14 +231,14 @@ class UIContext
 
     auto notebook = new Notebook();
     notebook.insertPage(statsBox, new Label(t("Stats")), Page.stats);
-    notebook.insertPage(riftsBox, new Label(t("Lunar Rifts")), Page.rifts);
+    notebook.insertPage(riftsBox, new Label(t("Portals")), Page.portals);
     notebook.addOnSwitchPage((Widget, uint pageNum, Notebook) {
       if (pageNum == Page.stats)
       {
-        if (m_riftTimer !is null)
+        if (m_portalTimer !is null)
         {
-          m_riftTimer.stop();
-          m_riftTimer = null;
+          m_portalTimer.stop();
+          m_portalTimer = null;
         }
 
         // Restore stat related view menu items.
@@ -250,8 +250,12 @@ class UIContext
       }
       else
       {
-        if (pageNum == Page.rifts)
-          m_riftTimer = new Timeout(1000, () { updateLunarRifts(); return true; }, true);
+        if (pageNum == Page.portals)
+          m_portalTimer = new Timeout(1000, () {
+            updateLunarRifts();
+            updateLostVale();
+            return true;
+          }, true);
 
         // Disable stat related view menu items if the stats page is not active.
         m_refreshMenuItem.setSensitive(false);
@@ -292,7 +296,7 @@ class UIContext
     enum Page
     {
       stats = 0,
-      rifts = 1
+      portals = 1
     }
 
     immutable string m_opensText;
@@ -318,7 +322,7 @@ class UIContext
     Button m_notesButton;
     Grid m_riftsgrid;
     Label m_lostValeLabel;
-    Timeout m_riftTimer;
+    Timeout m_portalTimer;
     RGBA m_textColor;
 
     void setStatusMessage(int page, string message = [])
@@ -556,15 +560,18 @@ class UIContext
         if (++riftNum > 7)
           riftNum = 0;
       }
+    }
 
+    void updateLostVale()
+    {
       // Get the Lost Vale countdown.
       immutable auto countdown = getLostValeCountdown();
       immutable auto open = countdown - (27 * 60);
 
       if (open >= 0)
       {
-        minutes = cast(int) open;
-        seconds = cast(int)(60.0 * (open - minutes) + 0.5);
+        immutable auto minutes = cast(int) open;
+        immutable auto seconds = cast(int)(60.0 * (open - minutes) + 0.5);
 
         m_lostValeLabel.setText(format(m_lvClosesText, minutes, seconds));
       }
@@ -577,8 +584,8 @@ class UIContext
               0.5) ~ "'>" ~ m_lvOpensText ~ "</span>";
         }
 
-        minutes = cast(int) countdown;
-        seconds = cast(int)(60.0 * (countdown - minutes) + 0.5);
+        immutable auto minutes = cast(int) countdown;
+        immutable auto seconds = cast(int)(60.0 * (countdown - minutes) + 0.5);
 
         m_lostValeLabel.setText(format(lostValeMarkup, minutes / 60, minutes % 60, seconds));
         m_lostValeLabel.setUseMarkup(true);
