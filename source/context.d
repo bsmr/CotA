@@ -577,18 +577,17 @@ class UIContext
       }
       else
       {
-        string lostValeMarkup = m_lvOpensText;
-        if (m_textColor.alpha() > 0.0)
-        {
-          lostValeMarkup = "<span foreground='" ~ htmlColor(m_textColor,
-              0.5) ~ "'>" ~ m_lvOpensText ~ "</span>";
-        }
-
         immutable auto minutes = cast(int) countdown;
         immutable auto seconds = cast(int)(60.0 * (countdown - minutes) + 0.5);
 
-        m_lostValeLabel.setText(format(lostValeMarkup, minutes / 60, minutes % 60, seconds));
-        m_lostValeLabel.setUseMarkup(true);
+        if (m_textColor.alpha() > 0.0)
+        {
+          m_lostValeLabel.setText(format("<span foreground='" ~ htmlColor(m_textColor,
+              0.5) ~ "'>" ~ m_lvOpensText ~ "</span>", minutes / 60, minutes % 60, seconds));
+          m_lostValeLabel.setUseMarkup(true);
+        }
+        else
+          m_lostValeLabel.setText(format(m_lvOpensText, minutes / 60, minutes % 60, seconds));
       }
     }
 
