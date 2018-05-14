@@ -65,9 +65,18 @@ ulong dateToULong(string date)
   if (timeParts.length != 3)
     return 0;
 
-  // Convert the hour, minute and second to integers and convert to 24 hour
-  // format.
-  immutable auto hour = to!(int)(timeParts[0]) + (icmp(components[2], "PM") == 0 ? 12 : 0);
+  // Convert the hour to integer and convert to 24 hour format.
+  auto hour = to!(int)(timeParts[0]);
+
+  // Noon and midnight become zero.
+  if (hour == 12)
+    hour = 0;
+  
+  // Add 12 for PM.
+  if (icmp(components[2], "PM") == 0)
+    hour += 12;
+
+  // Convert the minute and second to integers.
   immutable auto minute = to!(int)(timeParts[1]);
   immutable auto second = to!(int)(timeParts[2]);
 
